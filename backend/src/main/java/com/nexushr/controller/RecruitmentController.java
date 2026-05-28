@@ -4,6 +4,7 @@ import com.nexushr.dto.RecruitmentDTO;
 import com.nexushr.service.RecruitmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,21 +29,25 @@ public class RecruitmentController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<RecruitmentDTO> createPosting(@RequestBody RecruitmentDTO dto) {
         return ResponseEntity.ok(recruitmentService.createPosting(dto));
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<RecruitmentDTO> updatePosting(@PathVariable Long id, @RequestBody RecruitmentDTO dto) {
         return ResponseEntity.ok(recruitmentService.updatePosting(id, dto));
     }
 
     @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<RecruitmentDTO> updateStatus(@PathVariable Long id, @RequestBody Map<String, String> body) {
         return ResponseEntity.ok(recruitmentService.updateStatus(id, body.get("status")));
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<Void> deletePosting(@PathVariable Long id) {
         recruitmentService.deletePosting(id);
         return ResponseEntity.noContent().build();

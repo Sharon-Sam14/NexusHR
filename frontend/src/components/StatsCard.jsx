@@ -1,52 +1,109 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { TrendingUp, TrendingDown, Minus } from "lucide-react";
 
+// Custom hook to animate numeric value changes
+function useCountUp(targetVal, duration = 800) {
+  const [count, setCount] = useState("0");
+
+  useEffect(() => {
+    const valueString = String(targetVal);
+    const numericStr = valueString.replace(/[^0-9.]/g, "");
+    const target = parseFloat(numericStr);
+    
+    if (isNaN(target)) {
+      setCount(targetVal);
+      return;
+    }
+
+    const isPercent = valueString.includes("%");
+    const isDollar = valueString.includes("$");
+    const start = 0;
+    const end = target;
+    const startTime = performance.now();
+
+    const updateCount = (currentTime) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      
+      // Ease out cubic
+      const easeProgress = 1 - Math.pow(1 - progress, 3);
+      const currentVal = start + easeProgress * (end - start);
+
+      let formatted = "";
+      if (isPercent) {
+        formatted = `${Math.round(currentVal)}%`;
+      } else if (isDollar) {
+        formatted = `$${Math.round(currentVal).toLocaleString()}`;
+      } else {
+        formatted = Math.round(currentVal).toLocaleString();
+      }
+
+      setCount(formatted);
+
+      if (progress < 1) {
+        requestAnimationFrame(updateCount);
+      } else {
+        setCount(targetVal);
+      }
+    };
+
+    requestAnimationFrame(updateCount);
+  }, [targetVal, duration]);
+
+  return count;
+}
+
 export default function StatsCard({ title, value, subtitle, icon: Icon, color = "cyan", trend, index = 0 }) {
+  const displayVal = useCountUp(value);
+
   const colorMap = {
-    cyan:    { bg: "from-cyan-500/20 to-cyan-600/10", icon: "bg-cyan-500/20 text-cyan-400", border: "border-cyan-500/20" },
-    indigo:  { bg: "from-indigo-500/20 to-indigo-600/10", icon: "bg-indigo-500/20 text-indigo-400", border: "border-indigo-500/20" },
-    emerald: { bg: "from-emerald-500/20 to-emerald-600/10", icon: "bg-emerald-500/20 text-emerald-400", border: "border-emerald-500/20" },
-    yellow:  { bg: "from-yellow-500/20 to-yellow-600/10", icon: "bg-yellow-500/20 text-yellow-400", border: "border-yellow-500/20" },
-    red:     { bg: "from-red-500/20 to-red-600/10", icon: "bg-red-500/20 text-red-400", border: "border-red-500/20" },
-    purple:  { bg: "from-purple-500/20 to-purple-600/10", icon: "bg-purple-500/20 text-purple-400", border: "border-purple-500/20" },
-    orange:  { bg: "from-orange-500/20 to-orange-600/10", icon: "bg-orange-500/20 text-orange-400", border: "border-orange-500/20" },
+    cyan:    { bg: "from-cyan-500/10 via-cyan-600/5 to-transparent", icon: "bg-cyan-500/10 text-cyan-400 border-cyan-500/20", glow: "shadow-cyan-500/5" },
+    indigo:  { bg: "from-indigo-500/10 via-indigo-600/5 to-transparent", icon: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20", glow: "shadow-indigo-500/5" },
+    emerald: { bg: "from-emerald-500/10 via-emerald-600/5 to-transparent", icon: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20", glow: "shadow-emerald-500/5" },
+    yellow:  { bg: "from-yellow-500/10 via-yellow-600/5 to-transparent", icon: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20", glow: "shadow-yellow-500/5" },
+    red:     { bg: "from-red-500/10 via-red-600/5 to-transparent", icon: "bg-red-500/10 text-red-400 border-red-500/20", glow: "shadow-red-500/5" },
+    purple:  { bg: "from-purple-500/10 via-purple-600/5 to-transparent", icon: "bg-purple-500/10 text-purple-400 border-purple-500/20", glow: "shadow-purple-500/5" },
   };
 
   const c = colorMap[color] || colorMap.cyan;
-
   const TrendIcon = trend > 0 ? TrendingUp : trend < 0 ? TrendingDown : Minus;
   const trendColor = trend > 0 ? "text-emerald-400" : trend < 0 ? "text-red-400" : "text-slate-500";
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.07, duration: 0.4 }}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
-      className={`relative overflow-hidden glass-card p-5 bg-gradient-to-br ${c.bg} border ${c.border}`}
+      transition={{ delay: index * 0.05, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+      className={`relative overflow-hidden glass-card p-5 bg-gradient-to-br ${c.bg} ${c.glow} group border border-slate-800/80`}
     >
-      {/* Decorative circle */}
-      <div className={`absolute -top-6 -right-6 w-24 h-24 rounded-full ${c.icon} opacity-20`} />
+      {/* Decorative gradient corner glow */}
+      <div className={`absolute -top-10 -right-10 w-28 h-28 rounded-full bg-gradient-to-br ${c.bg} filter blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-300 pointer-events-none`} />
 
       <div className="relative flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">{title}</p>
-          <p className="text-3xl font-bold text-white mt-1.5 leading-none tabular-nums">{value}</p>
+          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{title}</p>
+          <p className="text-2xl font-extrabold text-white mt-2 leading-none tracking-tight tabular-nums">
+            {displayVal}
+          </p>
           {subtitle && (
-            <p className="text-xs text-slate-500 mt-1.5">{subtitle}</p>
+            <p className="text-[11px] text-slate-550 mt-2 font-medium flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-slate-700 block" />
+              {subtitle}
+            </p>
           )}
           {trend !== undefined && (
-            <div className={`flex items-center gap-1 mt-2 ${trendColor}`}>
+            <div className={`flex items-center gap-1 mt-2.5 ${trendColor} text-[10px] font-semibold uppercase tracking-wider`}>
               <TrendIcon size={12} />
-              <span className="text-xs font-medium">
+              <span>
                 {trend > 0 ? "+" : ""}{trend}% vs last month
               </span>
             </div>
           )}
         </div>
         {Icon && (
-          <div className={`flex-shrink-0 w-11 h-11 rounded-xl flex items-center justify-center ${c.icon}`}>
-            <Icon size={22} />
+          <div className={`flex-shrink-0 w-10 h-10 rounded-xl border flex items-center justify-center transition-all duration-300 group-hover:scale-110 ${c.icon}`}>
+            <Icon size={18} />
           </div>
         )}
       </div>

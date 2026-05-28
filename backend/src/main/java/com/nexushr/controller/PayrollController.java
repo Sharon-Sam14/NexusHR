@@ -19,21 +19,25 @@ public class PayrollController {
     private final PayrollService payrollService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<List<PayrollDTO>> getAllPayrolls() {
         return ResponseEntity.ok(payrollService.getAllPayrolls());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR') or @securityHelper.isPayrollOwner(#id)")
     public ResponseEntity<PayrollDTO> getPayrollById(@PathVariable Long id) {
         return ResponseEntity.ok(payrollService.getPayrollById(id));
     }
 
     @GetMapping("/employee/{employeeId}")
+    @PreAuthorize("@securityHelper.isOwner(#employeeId)")
     public ResponseEntity<List<PayrollDTO>> getByEmployee(@PathVariable Long employeeId) {
         return ResponseEntity.ok(payrollService.getPayrollByEmployee(employeeId));
     }
 
     @GetMapping("/month/{month}/year/{year}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<List<PayrollDTO>> getByMonth(@PathVariable Integer month, @PathVariable Integer year) {
         return ResponseEntity.ok(payrollService.getPayrollByMonth(month, year));
     }

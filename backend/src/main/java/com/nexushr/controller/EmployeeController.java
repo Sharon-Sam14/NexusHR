@@ -18,11 +18,13 @@ public class EmployeeController {
     private final EmployeeService employeeService;
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
         return ResponseEntity.ok(employeeService.getAllEmployees());
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR') or @securityHelper.isOwner(#id)")
     public ResponseEntity<EmployeeDTO> getEmployeeById(@PathVariable Long id) {
         return ResponseEntity.ok(employeeService.getEmployeeById(id));
     }
@@ -47,6 +49,7 @@ public class EmployeeController {
     }
 
     @GetMapping("/department/{department}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
     public ResponseEntity<List<EmployeeDTO>> getByDepartment(@PathVariable String department) {
         return ResponseEntity.ok(employeeService.getEmployeesByDepartment(department));
     }

@@ -18,7 +18,7 @@ export default function ConfirmDialog({ isOpen, onConfirm, onCancel, title, mess
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={{ type: "spring", stiffness: 500, damping: 35 }}
-            className="relative w-full max-w-sm glass-card p-6 shadow-2xl"
+            className="relative w-full max-w-sm bg-[#020617] border border-slate-800 rounded-2xl p-6 shadow-2xl z-50"
           >
             <div className="flex items-start gap-4">
               <div className="w-10 h-10 rounded-xl bg-red-500/15 flex items-center justify-center flex-shrink-0">

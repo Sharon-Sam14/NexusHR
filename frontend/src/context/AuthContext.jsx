@@ -16,7 +16,11 @@ export function AuthProvider({ children }) {
     if (storedToken && storedUser) {
       try {
         setToken(storedToken);
-        setUser(JSON.parse(storedUser));
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser.employeeId && !parsedUser.employee) {
+          parsedUser.employee = { id: parsedUser.employeeId };
+        }
+        setUser(parsedUser);
       } catch {
         localStorage.removeItem("nexushr_token");
         localStorage.removeItem("nexushr_user");
@@ -28,6 +32,10 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const data = await authService.login(email, password);
     const { token, ...userInfo } = data;
+
+    if (userInfo.employeeId) {
+      userInfo.employee = { id: userInfo.employeeId };
+    }
 
     localStorage.setItem("nexushr_token", token);
     localStorage.setItem("nexushr_user", JSON.stringify(userInfo));

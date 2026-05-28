@@ -44,7 +44,7 @@ export default function Modal({ isOpen, onClose, title, children, size = "md", f
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 10 }}
             transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className={`relative w-full ${sizeMap[size]} glass-card overflow-hidden shadow-2xl max-h-[90vh] flex flex-col`}
+            className={`relative w-full ${sizeMap[size]} bg-[#020617] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl max-h-[90vh] flex flex-col z-50`}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50 flex-shrink-0">

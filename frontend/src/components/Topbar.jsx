@@ -6,19 +6,21 @@ import { useAuth } from "../context/AuthContext";
 import { notificationService } from "../services/notificationService";
 import { timeAgo } from "../utils/formatters";
 import { getInitials } from "../utils/formatters";
+import CommandPalette from "./CommandPalette";
 
 // Map location to page title
 const pageTitles = {
-  "/dashboard": "Dashboard",
-  "/employees": "Employees",
-  "/attendance": "Attendance",
+  "/dashboard": "Dashboard Overview",
+  "/employees": "Employees Directory",
+  "/attendance": "Attendance Logs",
   "/leave": "Leave Management",
-  "/payroll": "Payroll",
-  "/performance": "Performance",
-  "/recruitment": "Recruitment",
-  "/notifications": "Notifications",
+  "/payroll": "Payroll Overview",
+  "/performance": "Performance Evaluation",
+  "/recruitment": "Recruitment Portal",
+  "/notifications": "Notifications Hub",
   "/profile": "My Profile",
-  "/departments": "Departments",
+  "/departments": "Departments Directory",
+  "/insights": "AI Workforce Insights",
 };
 
 export default function Topbar() {
@@ -28,6 +30,7 @@ export default function Topbar() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifs, setShowNotifs] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
   const bellRef = useRef(null);
 
   const pageTitle = pageTitles[location.pathname] || "NexusHR";
@@ -37,6 +40,18 @@ export default function Topbar() {
       fetchNotifications();
     }
   }, [user]);
+
+  // Keyboard binding for Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setPaletteOpen(prev => !prev);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   const fetchNotifications = async () => {
     try {
@@ -64,23 +79,29 @@ export default function Topbar() {
     } catch {}
   };
 
-  const typeColors = {
-    LEAVE: "bg-yellow-500/20 text-yellow-400",
-    PAYROLL: "bg-emerald-500/20 text-emerald-400",
-    ATTENDANCE: "bg-blue-500/20 text-blue-400",
-    SYSTEM: "bg-cyan-500/20 text-cyan-400",
-  };
-
   return (
-    <header className="h-16 bg-slate-900/80 backdrop-blur-xl border-b border-slate-800/60 flex items-center px-6 gap-4 sticky top-0 z-30">
-      {/* Page title */}
-      <div className="flex-1">
-        <h2 className="text-lg font-semibold text-white">{pageTitle}</h2>
+    <header className="h-16 bg-slate-900/40 backdrop-blur-xl border-b border-slate-800/60 flex items-center px-6 gap-4 sticky top-0 z-30 justify-between">
+      {/* Page title & Console trigger */}
+      <div className="flex items-center gap-6">
+        <h2 className="text-md font-bold text-white tracking-tight hidden md:block">
+          {pageTitle}
+        </h2>
+        
+        {/* Search Console button */}
+        <button
+          onClick={() => setPaletteOpen(true)}
+          className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-slate-950/50 border border-slate-800/60 text-slate-500 hover:text-slate-400 hover:border-slate-700/35 transition-all text-left text-[11px] w-52 sm:w-60 select-none relative group"
+        >
+          <Search size={13} className="text-slate-500 group-hover:text-slate-400 transition-colors" />
+          <span>Search or run action...</span>
+          <span className="absolute right-2 px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-[9px] text-slate-500 font-bold uppercase tracking-wider">
+            Ctrl K
+          </span>
+        </button>
       </div>
 
       {/* Right actions */}
       <div className="flex items-center gap-3">
-
         {/* Notification Bell */}
         <div className="relative" ref={bellRef}>
           <button
@@ -88,10 +109,10 @@ export default function Topbar() {
             onClick={() => setShowNotifs(!showNotifs)}
             className="relative btn-icon"
           >
-            <Bell size={20} />
+            <Bell size={18} />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-4.5 h-4.5 bg-red-500 rounded-full text-[10px] font-bold text-white flex items-center justify-center min-w-[18px] px-1">
-                {unreadCount > 9 ? "9+" : unreadCount}
+              <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-r from-red-500 to-rose-600 rounded-full text-[9px] font-black text-white flex items-center justify-center shadow-lg shadow-red-500/20">
+                {unreadCount > 9 ? "9" : unreadCount}
               </span>
             )}
           </button>
@@ -100,7 +121,7 @@ export default function Topbar() {
             {showNotifs && (
               <>
                 <div
-                  className="fixed inset-0 z-40"
+                  className="fixed inset-0 z-45"
                   onClick={() => setShowNotifs(false)}
                 />
                 <motion.div
@@ -108,21 +129,21 @@ export default function Topbar() {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: -10, scale: 0.97 }}
                   transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-full mt-2 w-80 glass-card overflow-hidden z-50 shadow-xl"
+                  className="absolute right-0 top-full mt-2 w-80 bg-[#020617] overflow-hidden z-50 shadow-xl border border-slate-800 rounded-2xl"
                 >
-                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
-                    <span className="font-semibold text-sm text-white">Notifications</span>
+                  <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/60 bg-slate-950/20">
+                    <span className="font-bold text-xs text-white uppercase tracking-wider">Notifications</span>
                     <button
                       onClick={handleMarkAllRead}
-                      className="text-xs text-cyan-400 hover:text-cyan-300"
+                      className="text-[10px] text-cyan-400 hover:text-cyan-300 font-semibold"
                     >
                       Mark all read
                     </button>
                   </div>
 
-                  <div className="max-h-72 overflow-y-auto">
+                  <div className="max-h-64 overflow-y-auto divide-y divide-slate-800/40">
                     {notifications.length === 0 ? (
-                      <div className="py-8 text-center text-slate-500 text-sm">
+                      <div className="py-10 text-center text-slate-500 text-xs">
                         No notifications
                       </div>
                     ) : (
@@ -130,16 +151,16 @@ export default function Topbar() {
                         <div
                           key={n.id}
                           onClick={() => handleMarkRead(n.id)}
-                          className={`px-4 py-3 border-b border-slate-700/30 cursor-pointer hover:bg-slate-800/40 transition-colors ${!n.read ? "bg-cyan-500/5" : ""}`}
+                          className={`px-4 py-3 cursor-pointer hover:bg-slate-800/25 transition-colors ${!n.read ? "bg-cyan-500/5" : ""}`}
                         >
                           <div className="flex items-start gap-2.5">
                             {!n.read && (
-                              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-2 flex-shrink-0" />
+                              <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 mt-1.5 flex-shrink-0 animate-pulse" />
                             )}
                             <div className={!n.read ? "" : "pl-4"}>
-                              <p className="text-sm font-medium text-white">{n.title}</p>
-                              <p className="text-xs text-slate-400 mt-0.5 line-clamp-2">{n.message}</p>
-                              <p className="text-[10px] text-slate-600 mt-1">{timeAgo(n.createdAt)}</p>
+                              <p className="text-xs font-semibold text-white">{n.title}</p>
+                              <p className="text-[11px] text-slate-400 mt-0.5 leading-relaxed">{n.message}</p>
+                              <p className="text-[9px] text-slate-600 mt-1 font-medium">{timeAgo(n.createdAt)}</p>
                             </div>
                           </div>
                         </div>
@@ -147,12 +168,12 @@ export default function Topbar() {
                     )}
                   </div>
 
-                  <div className="px-4 py-2 border-t border-slate-700/50">
+                  <div className="px-4 py-2 border-t border-slate-800/60 bg-slate-950/20">
                     <button
                       onClick={() => { setShowNotifs(false); navigate("/notifications"); }}
-                      className="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
+                      className="text-[10px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-semibold"
                     >
-                      View all notifications <ChevronRight size={12} />
+                      View all notifications <ChevronRight size={10} />
                     </button>
                   </div>
                 </motion.div>
@@ -164,17 +185,20 @@ export default function Topbar() {
         {/* User Avatar */}
         <button
           onClick={() => navigate("/profile")}
-          className="flex items-center gap-2.5 px-3 py-1.5 rounded-xl hover:bg-slate-800/60 transition-colors"
+          className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-800/20 border border-transparent hover:border-slate-800/50 transition-all"
         >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+          <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-cyan-500 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shadow-md shadow-cyan-500/10">
             {getInitials(user?.name || "U")}
           </div>
           <div className="hidden sm:block text-left">
-            <p className="text-sm font-medium text-white leading-none">{user?.name?.split(" ")[0]}</p>
-            <p className="text-[10px] text-slate-500">{user?.role}</p>
+            <p className="text-xs font-semibold text-white leading-none">{user?.name?.split(" ")[0]}</p>
+            <p className="text-[9px] text-slate-500 mt-0.5 font-medium uppercase tracking-wider">{user?.role}</p>
           </div>
         </button>
       </div>
+
+      {/* Global Command Palette */}
+      <CommandPalette isOpen={paletteOpen} onClose={() => setPaletteOpen(false)} />
     </header>
   );
 }
