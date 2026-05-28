@@ -20,69 +20,86 @@ This project is built using:
 
 ---
 
+# 🔑 Demo Credentials (Quick Access)
+
+The login screen contains a **Developer Credentials** helper panel for one-click authentication. The seeded role-based accounts are:
+
+| Module Role | Email Address | Password | Privileges / Permissions |
+| :--- | :--- | :--- | :--- |
+| **System Admin** | `admin@nexushr.com` | `admin123` | Full administrative control, system logs, dashboard analytics, and recruitment |
+| **HR Manager** | `hr@nexushr.com` | `hr123456` | Complete workforce database, leave approvals, payroll runs, and AI Insights |
+| **Employee View** | `employee@nexushr.com` | `emp12345` | Clock-in/out, personal leave balances, individual payslips, and review history |
+
+---
+
 # Core Features
 
-## Authentication & Security
-- JWT Authentication
-- Secure Login System
-- Role-Based Access Control (Admin / Employee)
-- Password Encryption
-- Protected API Routes
+## 🔒 Authentication & Security
+- JWT Authentication (Stateless Security Filter)
+- Secure Login System with Frontend Auto-Login Triggers
+- Role-Based Access Control (Admin / HR / Employee)
+- Password Encryption via BCryptPasswordEncoder
+- Controller-level Ownership Checks (`isOwner`, `isPayrollOwner`) for complete data privacy
 
 ---
 
-## Employee Management
-- Add Employees
-- Update Employee Details
-- Delete Employees
-- View Employee Information
-- Department & Designation Management
+## 📂 Employee Lifecycle & Document Management
+- Add, update, and manage employee profiles
+- Dynamic onboarding status workflow
+- **Onboarding Document Management:** Secure drag-and-drop document upload (PDF, images, contracts), file size validation, downloading, and removal directly inside user profiles.
 
 ---
 
-## Attendance Management
-- Mark Daily Attendance
-- Attendance Records
-- Attendance Status Tracking
-- Attendance Dashboard
+## ⏱️ Attendance & Leave Management
+- Check-in / Check-out button widget (Real-time biometric simulation)
+- Dynamic **Leave Balance Pools** (subtracts approved leave days from dedicated employee pools and restores them on cancel/rejection)
+- Real-time leave status tracking & HR approval workflow
+- Visual leave metrics dashboard
 
 ---
 
-## Leave Management
-- Apply Leave Requests
-- Approve / Reject Leave Requests
-- Leave Status Tracking
-- Employee Leave History
+## 💳 Payroll & Payslip Export
+- Automated monthly payroll runs
+- **Dynamic Tax Engine:** Automatic bracket calculation (12%, 18%, 25% tiers) based on basic salary
+- Payslip detail models showing net pay, deductions, bonuses, and tax
+- **CSV Data Export:** One-click spreadsheet-compatible CSV export for payroll logs
 
 ---
 
-## Payroll System
-- Salary Management
-- Payroll Calculation
-- Tax Deduction Logic
-- Payslip Generation
-- Payroll Dashboard
+## 🧠 AI Workforce Intelligence Co-Pilot
+- Notion-style floating AI Brain drawer pulling active database statistics
+- Real-time departmental metrics analyzing Attrition Risk, Skill Gaps, and Employee Engagement Ratings
+- Hidden from standard employees to prevent company-wide data leakage
 
 ---
 
-## Dashboard & Analytics
-- Employee Statistics
-- Attendance Analytics
-- Payroll Summary
-- Leave Summary
-- Workforce Insights
+## ✉️ Simulated Notification Gateways (SMTP & Twilio)
+- Console logging simulators displaying live SMTP mail headers and Twilio SMS message bodies upon event triggers
+- Live **Email (SMTP) Sent** and **SMS (Twilio) Dispatched** delivery verification badges on the Notifications Centre feed
+
+---
+
+## ⌨️ Command Palette (`Ctrl + K`)
+- Vercel/Linear-inspired fuzzy-search command palette overlay
+- Instantly navigate to core pages or trigger quick actions via keyboard shortcuts
+
+---
+
+## 🎨 Visual Polish & UI Themes
+- Fully custom, premium dark-mode theme
+- Animated, looping mesh background gradients
+- Count-up statistics metrics and Recharts charts with neon-glow filters
 
 ---
 
 # Tech Stack
 
 ## Backend
-- Java 21
+- Java 22
 - Spring Boot 3
-- Spring Security
+- Spring Security (JWT)
 - Spring Data JPA
 - PostgreSQL
-- JWT Authentication
 - Maven
 
 ---
@@ -92,8 +109,9 @@ This project is built using:
 - Vite
 - Tailwind CSS
 - Axios
-- React Router
 - Recharts
+- Framer Motion
+- Lucide Icons
 
 ---
 
@@ -106,8 +124,6 @@ This project is built using:
 - VS Code
 - GitHub
 - Postman
-- Render
-- Vercel
 
 ---
 
@@ -134,10 +150,11 @@ NexusHR/
 ├── docs/
 │
 └── README.md
-
+```
 
 # Backend Structure
 
+```text
 backend/src/main/java/com/nexushr/
 │
 ├── config/
@@ -149,9 +166,11 @@ backend/src/main/java/com/nexushr/
 ├── security/
 ├── service/
 │   └── impl/
+```
 
 # Frontend Structure
 
+```text
 frontend/src/
 │
 ├── api/
@@ -165,36 +184,11 @@ frontend/src/
 ├── utils/
 │
 ├── App.jsx
+│
 ├── main.jsx
+│
 └── index.css
-
-# Future Enhancements
-
-AI-Based Workforce Insights
-Real-Time Notifications
-Email Integration
-PDF Payslip Export
-Excel Report Export
-Employee Performance Tracking
-Dark Mode
-Advanced Analytics Dashboard
-Security Features
-JWT Token Authentication
-Password Encryption
-Input Validation
-Protected Routes
-Role-Based Authorization
-Secure REST APIs
-Deployment
-Frontend
-Vercel
-Backend
-Render
-Database
-PostgreSQL / Supabase
-Screenshots
-
-Project screenshots will be added inside the screenshots/ folder.
+```
 
 # Documentation
 
