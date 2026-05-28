@@ -9,8 +9,11 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class DashboardServiceImpl implements DashboardService {
 
     private final EmployeeRepository employeeRepository;

@@ -13,12 +13,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+
 /*
  * Performance Service Implementation
  */
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings("null")
+@Transactional
 public class PerformanceServiceImpl implements PerformanceService {
 
     private final PerformanceRepository performanceRepository;

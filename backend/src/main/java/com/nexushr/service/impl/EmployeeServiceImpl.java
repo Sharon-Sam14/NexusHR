@@ -11,12 +11,15 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+
 /*
  * Employee Service Implementation
  */
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings("null")
+@Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;

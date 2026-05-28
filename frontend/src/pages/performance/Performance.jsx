@@ -261,12 +261,19 @@ export default function Performance() {
     {
       key: "employee",
       label: "Employee",
-      render: (val, row) => (
-        <div>
-          <p className="font-semibold text-white">{isHR() ? val?.employeeName : user?.name}</p>
-          <p className="text-[10px] text-slate-400">{isHR() ? `${val?.department} • ${val?.designation}` : user?.role}</p>
-        </div>
-      ),
+      render: (val, row) => {
+        const name = isHR() ? (val?.employeeName || row?.employeeName || "—") : user?.name;
+        const dept = isHR() ? (val?.department || row?.department || "—") : "";
+        const desig = isHR() ? (val?.designation || row?.designation || "") : "";
+        return (
+          <div>
+            <p className="font-semibold text-white">{name}</p>
+            <p className="text-[10px] text-slate-400">
+              {isHR() ? `${dept}${desig ? ` • ${desig}` : ""}` : user?.role}
+            </p>
+          </div>
+        );
+      },
     },
     { key: "reviewPeriod", label: "Period" },
     {

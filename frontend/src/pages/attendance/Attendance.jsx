@@ -284,17 +284,22 @@ export default function Attendance() {
     {
       key: "employee",
       label: "Employee",
-      render: (val) => (
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-400">
-            {val?.employeeName?.charAt(0)}
+      render: (val, row) => {
+        const name = val?.employeeName || row?.employeeName || "—";
+        const dept = val?.department || row?.department || "—";
+        const desig = val?.designation || row?.designation || "";
+        return (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-400">
+              {name.charAt(0)}
+            </div>
+            <div>
+              <p className="font-semibold text-white">{name}</p>
+              <p className="text-xs text-slate-400">{dept}{desig ? ` • ${desig}` : ""}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-white">{val?.employeeName}</p>
-            <p className="text-xs text-slate-400">{val?.department} • {val?.designation}</p>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     { key: "checkIn", label: "Check In", render: (val) => val ? val.substring(0, 5) : "—" },
     { key: "checkOut", label: "Check Out", render: (val) => val ? val.substring(0, 5) : "—" },

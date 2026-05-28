@@ -213,17 +213,21 @@ export default function LeaveManagement() {
     {
       key: "employee",
       label: "Employee",
-      render: (val) => (
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-400">
-            {val?.employeeName?.charAt(0)}
+      render: (val, row) => {
+        const name = val?.employeeName || row?.employeeName || "—";
+        const dept = val?.department || row?.department || "—";
+        return (
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center font-bold text-cyan-400">
+              {name.charAt(0)}
+            </div>
+            <div>
+              <p className="font-semibold text-white">{name}</p>
+              <p className="text-[10px] text-slate-400">{dept}</p>
+            </div>
           </div>
-          <div>
-            <p className="font-semibold text-white">{val?.employeeName}</p>
-            <p className="text-[10px] text-slate-400">{val?.department}</p>
-          </div>
-        </div>
-      ),
+        );
+      },
     },
     { key: "leaveType", label: "Type" },
     { key: "startDate", label: "Start Date", render: (val) => new Date(val).toLocaleDateString() },

@@ -12,8 +12,11 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.transaction.annotation.Transactional;
+
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class AiInsightsServiceImpl implements AiInsightsService {
 
     private final EmployeeRepository employeeRepository;

@@ -15,12 +15,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.springframework.transaction.annotation.Transactional;
+
 /*
  * Leave Request Service Implementation
  */
 @Service
 @RequiredArgsConstructor
 @SuppressWarnings("null")
+@Transactional
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     private final LeaveRequestRepository leaveRequestRepository;
