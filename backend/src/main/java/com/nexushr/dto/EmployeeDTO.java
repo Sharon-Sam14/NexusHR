@@ -30,5 +30,5 @@ public class EmployeeDTO {
     private String gender;
     private LocalDate dateOfBirth;
     private String emergencyContact;
-
+    private Integer leaveBalance;
 }

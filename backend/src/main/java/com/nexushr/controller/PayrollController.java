@@ -54,4 +54,34 @@ public class PayrollController {
         return ResponseEntity.ok(payrollService.updatePayrollStatus(id, body.get("status")));
     }
 
+    @GetMapping("/{id}/download")
+    @PreAuthorize("hasAnyRole('ADMIN', 'HR') or @securityHelper.isPayrollOwner(#id)")
+    public ResponseEntity<byte[]> downloadPayrollCsv(@PathVariable Long id) {
+        PayrollDTO p = payrollService.getPayrollById(id);
+        
+        StringBuilder csv = new StringBuilder();
+        csv.append("Parameter,Value\n");
+        csv.append("Payslip ID,").append(p.getId()).append("\n");
+        csv.append("Employee Name,\"").append(p.getEmployeeName()).append("\"\n");
+        csv.append("Department,\"").append(p.getDepartment()).append("\"\n");
+        csv.append("Designation,\"").append(p.getDesignation()).append("\"\n");
+        csv.append("Month / Year,").append(p.getMonth()).append(" / ").append(p.getYear()).append("\n");
+        csv.append("Basic Salary,").append(p.getBasicSalary()).append("\n");
+        csv.append("Bonus,").append(p.getBonus()).append("\n");
+        csv.append("Deductions,").append(p.getDeductions()).append("\n");
+        csv.append("Tax Deduction,").append(p.getTax()).append("\n");
+        csv.append("Net Salary Payout,").append(p.getNetSalary()).append("\n");
+        csv.append("Payment Status,").append(p.getStatus()).append("\n");
+        csv.append("Working Days,").append(p.getWorkingDays()).append("\n");
+        csv.append("Days Present,").append(p.getDaysPresent()).append("\n");
+        csv.append("Remarks,\"").append(p.getRemarks() != null ? p.getRemarks().replace("\"", "\"\"") : "").append("\"\n");
+
+        byte[] data = csv.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+        return ResponseEntity.ok()
+                .header(org.springframework.http.HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"payslip_" + p.getId() + ".csv\"")
+                .contentType(org.springframework.http.MediaType.parseMediaType("text/csv"))
+                .body(data);
+    }
+
 }

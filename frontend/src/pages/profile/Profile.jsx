@@ -1,16 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { User, Shield, Briefcase, Mail, Phone, Calendar, MapPin, KeyRound, Check } from "lucide-react";
+import { User, Shield, Briefcase, Mail, Phone, Calendar, MapPin, KeyRound, Check, UploadCloud, Trash2, Download, FileText } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { employeeService } from "../../services/employeeService";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import Badge from "../../components/Badge";
+import { formatFileSize } from "../../utils/formatters";
 
 export default function Profile() {
   const { user } = useAuth();
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("PERSONAL"); // PERSONAL, JOB, SECURITY
+  const [activeTab, setActiveTab] = useState("PERSONAL"); // PERSONAL, JOB, SECURITY, DOCUMENTS
+  const [documents, setDocuments] = useState([]);
 
   // Security Form
   const [passwordForm, setPasswordForm] = useState({
@@ -29,14 +31,71 @@ export default function Profile() {
     }
   }, [user]);
 
+  const fetchDocuments = async (empId) => {
+    try {
+      const docs = await employeeService.getDocuments(empId);
+      setDocuments(docs);
+    } catch (error) {
+      console.error("Failed to load documents", error);
+    }
+  };
+
   const fetchEmployeeDetails = async () => {
     try {
       const data = await employeeService.getById(user.employee.id);
       setEmployee(data);
+      await fetchDocuments(user.employee.id);
     } catch (error) {
       console.error("Failed to load employee details", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      await employeeService.uploadDocument(user.employee.id, formData);
+      fetchDocuments(user.employee.id);
+    } catch (error) {
+      alert("Failed to upload file: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleDownloadFile = async (docId, fileName) => {
+    try {
+      const token = localStorage.getItem("nexushr_token");
+      const response = await fetch(`http://localhost:8081/api/documents/${docId}/download`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert("Failed to download document");
+    }
+  };
+
+  const handleDeleteFile = async (docId) => {
+    if (window.confirm("Are you sure you want to delete this document?")) {
+      try {
+        await employeeService.deleteDocument(docId);
+        fetchDocuments(user.employee.id);
+      } catch (error) {
+        alert("Failed to delete document");
+      }
     }
   };
 
@@ -133,6 +192,18 @@ export default function Profile() {
           <Shield size={14} />
           <span>Security</span>
         </button>
+        {user?.employee?.id && (
+          <button
+            onClick={() => setActiveTab("DOCUMENTS")}
+            className={`flex items-center gap-2 px-5 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 transition-all ${activeTab === "DOCUMENTS"
+              ? "border-cyan-500 text-white bg-slate-900/10"
+              : "border-transparent text-slate-500 hover:text-slate-300"
+            }`}
+          >
+            <FileText size={14} />
+            <span>Documents</span>
+          </button>
+        )}
       </div>
 
       {/* Tab Panels */}
@@ -286,6 +357,78 @@ export default function Profile() {
                 Update Password
               </button>
             </form>
+          </div>
+        )}
+
+        {activeTab === "DOCUMENTS" && (
+          <div className="space-y-6">
+            <h3 className="text-sm font-bold text-white border-b border-slate-800 pb-2">Employee Documents</h3>
+            {/* File Dropzone/Input */}
+            <div className="p-6 border border-dashed border-slate-700 rounded-2xl bg-slate-900/40 text-center flex flex-col items-center justify-center space-y-3">
+              <UploadCloud size={32} className="text-cyan-400 animate-pulse" />
+              <div>
+                <p className="text-xs text-white font-medium">Drag and drop file here, or click to upload</p>
+                <p className="text-[10px] text-slate-505 mt-1">Supported files: PDF, Word, JPEG, PNG (max 10MB)</p>
+              </div>
+              <input
+                type="file"
+                id="file-upload"
+                className="hidden"
+                onChange={handleFileUpload}
+              />
+              <button
+                type="button"
+                onClick={() => document.getElementById("file-upload").click()}
+                className="btn-primary text-xs py-2 px-4"
+              >
+                Choose File
+              </button>
+            </div>
+
+            {/* Documents List */}
+            <div className="space-y-3">
+              <h4 className="text-xs font-semibold text-slate-400 uppercase tracking-widest">Uploaded Files ({documents.length})</h4>
+              {documents.length > 0 ? (
+                <div className="grid grid-cols-1 gap-3">
+                  {documents.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-between hover:border-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-lg bg-slate-800/40 flex items-center justify-center text-cyan-400">
+                          <FileText size={18} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-semibold text-white truncate max-w-[200px] sm:max-w-md">{doc.fileName}</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">
+                            {formatFileSize(doc.fileSize)} • Uploaded on {new Date(doc.uploadedAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => handleDownloadFile(doc.id, doc.fileName)}
+                          className="btn-icon text-cyan-400 hover:text-cyan-300"
+                          title="Download"
+                        >
+                          <Download size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteFile(doc.id)}
+                          className="btn-icon text-red-400 hover:text-red-305"
+                          title="Delete"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-slate-500 text-center py-4">No documents uploaded yet.</p>
+              )}
+            </div>
           </div>
         )}
       </div>

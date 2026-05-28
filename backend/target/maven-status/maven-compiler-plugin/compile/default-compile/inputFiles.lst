@@ -43,6 +43,7 @@ C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\repository\Atte
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\DashboardStatsDTO.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\controller\RecruitmentController.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\BackendApplication.java
+C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\entity\EmployeeDocument.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\repository\RecruitmentRepository.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\service\EmployeeService.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\LeaveRequestDTO.java
@@ -69,9 +70,12 @@ C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\controller\Empl
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\controller\PayrollController.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\controller\NotificationController.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\LoginRequest.java
+C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\DocumentDTO.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\NotificationDTO.java
+C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\controller\DocumentController.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\PayrollDTO.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\dto\PerformanceDTO.java
+C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\repository\EmployeeDocumentRepository.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\service\RecruitmentService.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\repository\EmployeeRepository.java
 C:\Users\sharo\Desktop\NexusHR\backend\src\main\java\com\nexushr\service\impl\NotificationServiceImpl.java

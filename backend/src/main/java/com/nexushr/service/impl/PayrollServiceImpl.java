@@ -35,7 +35,18 @@ public class PayrollServiceImpl implements PayrollService {
         double basicSalary = dto.getBasicSalary() != null ? dto.getBasicSalary() : employee.getSalary();
         double bonus = dto.getBonus() != null ? dto.getBonus() : 0.0;
         double deductions = dto.getDeductions() != null ? dto.getDeductions() : 0.0;
-        double tax = dto.getTax() != null ? dto.getTax() : 0.0;
+        double tax = (dto.getTax() != null && dto.getTax() > 0.0) ? dto.getTax() : 0.0;
+        
+        if (tax == 0.0) {
+            if (basicSalary <= 5000.0) {
+                tax = Math.round(basicSalary * 0.12 * 100.0) / 100.0;
+            } else if (basicSalary <= 10000.0) {
+                tax = Math.round(basicSalary * 0.18 * 100.0) / 100.0;
+            } else {
+                tax = Math.round(basicSalary * 0.25 * 100.0) / 100.0;
+            }
+        }
+        
         double netSalary = basicSalary + bonus - deductions - tax;
 
         Payroll payroll = Payroll.builder()

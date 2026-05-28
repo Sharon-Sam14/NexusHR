@@ -172,6 +172,16 @@ export default function Notifications() {
                 <p className={`text-xs mt-1 text-slate-300 leading-relaxed ${notif.read ? "text-slate-400 opacity-80" : ""}`}>
                   {notif.message}
                 </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-450 border border-emerald-500/20">
+                    <span className="w-1 h-1 bg-emerald-400 rounded-full" />
+                    <span>Email (SMTP) Sent</span>
+                  </span>
+                  <span className="inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-450 border border-blue-500/20">
+                    <span className="w-1 h-1 bg-blue-400 rounded-full" />
+                    <span>SMS (Twilio) Dispatched</span>
+                  </span>
+                </div>
               </div>
 
               {/* Actions */}

@@ -227,6 +227,27 @@ export default function Payroll() {
     window.print();
   };
 
+  const handleDownloadSlip = async (id) => {
+    try {
+      const token = localStorage.getItem("nexushr_token");
+      const response = await fetch(`http://localhost:8081/api/payroll/${id}/download`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `payslip_${id}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert("Failed to download payslip file.");
+    }
+  };
+
   // Month map
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -587,6 +608,13 @@ export default function Payroll() {
               >
                 <Printer size={14} />
                 <span>Print Slip</span>
+              </button>
+              <button
+                onClick={() => handleDownloadSlip(selectedSlip.id)}
+                className="btn-primary flex items-center gap-1.5 text-xs py-2 bg-gradient-to-r from-emerald-500 to-teal-650 hover:from-emerald-450 hover:to-teal-550 border-0"
+              >
+                <Download size={14} />
+                <span>Download Excel/CSV</span>
               </button>
               <button
                 onClick={() => setIsSlipOpen(false)}

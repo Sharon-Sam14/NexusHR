@@ -65,6 +65,9 @@ public class EmployeeServiceImpl implements EmployeeService {
         existing.setGender(dto.getGender());
         existing.setDateOfBirth(dto.getDateOfBirth());
         existing.setEmergencyContact(dto.getEmergencyContact());
+        if (dto.getLeaveBalance() != null) {
+            existing.setLeaveBalance(dto.getLeaveBalance());
+        }
         if (dto.getStatus() != null) {
             existing.setStatus(dto.getStatus());
         }
@@ -107,6 +110,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .gender(e.getGender())
                 .dateOfBirth(e.getDateOfBirth())
                 .emergencyContact(e.getEmergencyContact())
+                .leaveBalance(e.getLeaveBalance())
                 .build();
     }
 
@@ -128,6 +132,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .gender(dto.getGender())
                 .dateOfBirth(dto.getDateOfBirth())
                 .emergencyContact(dto.getEmergencyContact())
+                .leaveBalance(dto.getLeaveBalance() != null ? dto.getLeaveBalance() : 15)
                 .build();
     }
 

@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { Plus, Check, X, Calendar, User, FileText, Search, AlertCircle } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { leaveService } from "../../services/leaveService";
+import { employeeService } from "../../services/employeeService";
 import DataTable from "../../components/DataTable";
 import Modal from "../../components/Modal";
 import Badge from "../../components/Badge";
@@ -45,6 +46,7 @@ export default function LeaveManagement() {
   const { user, isHR, loading: authLoading } = useAuth();
   const [leaves, setLeaves] = useState([]);
   const [pendingLeaves, setPendingLeaves] = useState([]);
+  const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Apply Form
@@ -84,8 +86,14 @@ export default function LeaveManagement() {
         setLeaves(allData.length > 0 ? allData : dummyLeaves);
         setPendingLeaves(pendingData.length > 0 ? pendingData : dummyLeaves.filter(l => l.status === "PENDING"));
       } else if (user?.employee?.id) {
-        const myData = await leaveService.getByEmployee(user.employee.id);
+        const [myData, empData] = await Promise.all([
+          leaveService.getByEmployee(user.employee.id),
+          employeeService.getById(user.employee.id).catch(() => null)
+        ]);
         setLeaves(myData.length > 0 ? myData : dummyLeaves.filter(l => l.employee?.employeeName === user.name));
+        if (empData) {
+          setEmployee(empData);
+        }
       } else {
         setLeaves(dummyLeaves);
       }
@@ -288,6 +296,31 @@ export default function LeaveManagement() {
           </button>
         )}
       </div>
+
+      {/* Leave Balance Overview (for Employees) */}
+      {!isHR() && (
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950/10">
+            <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Leave Balance Pool</span>
+            <p className="text-2xl font-black text-white mt-1">{employee?.leaveBalance !== undefined ? employee.leaveBalance : 15} days</p>
+            <p className="text-xs text-slate-400 mt-1">Available days for annual requests</p>
+          </div>
+          <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950/10">
+            <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Approved Leave Days</span>
+            <p className="text-2xl font-black text-emerald-450 mt-1">
+              {leaves.filter(l => l.status === "APPROVED").reduce((sum, l) => sum + l.totalDays, 0)} days
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Total time-off logged this year</p>
+          </div>
+          <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950/10">
+            <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Pending Approvals</span>
+            <p className="text-2xl font-black text-yellow-450 mt-1">
+              {leaves.filter(l => l.status === "PENDING").reduce((sum, l) => sum + l.totalDays, 0)} days
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Awaiting HR/Manager review</p>
+          </div>
+        </div>
+      )}
 
       {/* HR Pending Approvals Queue */}
       {isHR() && pendingLeaves.length > 0 && (

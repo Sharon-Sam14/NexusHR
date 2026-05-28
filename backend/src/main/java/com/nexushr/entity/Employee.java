@@ -66,6 +66,10 @@ public class Employee {
     @Builder.Default
     private EmployeeStatus status = EmployeeStatus.ACTIVE;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer leaveBalance = 15;
+
     /*
      * Gender
      */

@@ -36,8 +36,18 @@ export default function Login() {
     }
   };
 
-  const fillCredentials = (email, pwd) => {
+  const fillCredentialsAndLogin = async (email, pwd) => {
     setForm({ email, password: pwd });
+    setError("");
+    setLoading(true);
+    try {
+      await login(email, pwd);
+      navigate("/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Invalid credentials. Please verify and try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -150,8 +160,9 @@ export default function Login() {
               ].map((cred) => (
                 <button
                   key={cred.email}
-                  onClick={() => fillCredentials(cred.email, cred.pass)}
+                  onClick={() => fillCredentialsAndLogin(cred.email, cred.pass)}
                   className="w-full text-left px-3.5 py-2.5 rounded-xl bg-slate-950/40 border border-slate-900/60 hover:border-slate-800/80 hover:bg-slate-900/20 text-[10px] flex items-center justify-between group transition-all"
+                  disabled={loading}
                 >
                   <div className="truncate pr-2">
                     <span className="font-bold text-cyan-400 block text-[9px] uppercase tracking-wider">{cred.label}</span>

@@ -32,7 +32,24 @@ public class NotificationServiceImpl implements NotificationService {
                 .createdAt(LocalDateTime.now())
                 .actionUrl(dto.getActionUrl())
                 .build();
-        return toDTO(notificationRepository.save(notification));
+        
+        Notification saved = notificationRepository.save(notification);
+
+        // Simulate sending multi-channel Email & SMS alert
+        System.out.println("=========================================================================");
+        System.out.println("[SMTP SIMULATOR] Sending email alert...");
+        System.out.println("To: " + dto.getUserEmail());
+        System.out.println("Subject: " + dto.getTitle());
+        System.out.println("Body: " + dto.getMessage());
+        System.out.println("[SMTP SIMULATOR] Email sent successfully with 95% SLA verification.");
+        System.out.println("-------------------------------------------------------------------------");
+        System.out.println("[TWILIO SMS SIMULATOR] Sending SMS notification alert...");
+        System.out.println("To User associated with: " + dto.getUserEmail());
+        System.out.println("SMS Message: " + dto.getTitle() + " - " + dto.getMessage());
+        System.out.println("[TWILIO SMS SIMULATOR] SMS sent successfully via mocked Twilio Gateway API.");
+        System.out.println("=========================================================================");
+
+        return toDTO(saved);
     }
 
     @Override

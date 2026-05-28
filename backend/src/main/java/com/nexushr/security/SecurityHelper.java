@@ -6,6 +6,7 @@ import com.nexushr.repository.PayrollRepository;
 import com.nexushr.repository.LeaveRequestRepository;
 import com.nexushr.repository.PerformanceRepository;
 import com.nexushr.repository.NotificationRepository;
+import com.nexushr.repository.EmployeeDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -22,6 +23,7 @@ public class SecurityHelper {
     private final LeaveRequestRepository leaveRequestRepository;
     private final PerformanceRepository performanceRepository;
     private final NotificationRepository notificationRepository;
+    private final EmployeeDocumentRepository employeeDocumentRepository;
 
     public boolean isOwner(Long employeeId) {
         if (employeeId == null) {
@@ -82,6 +84,15 @@ public class SecurityHelper {
         }
         return notificationRepository.findById(notificationId)
                 .map(notif -> notif.getUserEmail().equals(email))
+                .orElse(false);
+    }
+
+    public boolean isDocumentOwner(Long documentId) {
+        if (documentId == null) {
+            return false;
+        }
+        return employeeDocumentRepository.findById(documentId)
+                .map(doc -> isOwner(doc.getEmployee().getId()))
                 .orElse(false);
     }
 }

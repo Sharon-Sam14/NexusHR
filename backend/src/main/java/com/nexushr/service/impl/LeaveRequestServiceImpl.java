@@ -36,6 +36,10 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
 
         int totalDays = (int) ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate()) + 1;
 
+        if (employee.getLeaveBalance() < totalDays) {
+            throw new RuntimeException("Insufficient leave balance. Remaining: " + employee.getLeaveBalance() + " days, Requested: " + totalDays + " days.");
+        }
+
         LeaveRequest request = LeaveRequest.builder()
                 .employee(employee)
                 .leaveType(dto.getLeaveType())
@@ -55,6 +59,19 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         LeaveRequest request = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
 
+        if (request.getStatus() == LeaveStatus.APPROVED) {
+            return toDTO(request);
+        }
+
+        Employee employee = request.getEmployee();
+        int totalDays = request.getTotalDays();
+        if (employee.getLeaveBalance() < totalDays) {
+            throw new RuntimeException("Insufficient leave balance. Remaining: " + employee.getLeaveBalance() + " days, Approved: " + totalDays + " days.");
+        }
+
+        employee.setLeaveBalance(employee.getLeaveBalance() - totalDays);
+        employeeRepository.save(employee);
+
         request.setStatus(LeaveStatus.APPROVED);
         request.setApprovedBy(approvedBy);
         request.setApprovalRemarks(remarks);
@@ -66,6 +83,12 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public LeaveRequestDTO rejectLeave(Long id, String approvedBy, String remarks) {
         LeaveRequest request = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
+
+        if (request.getStatus() == LeaveStatus.APPROVED) {
+            Employee employee = request.getEmployee();
+            employee.setLeaveBalance(employee.getLeaveBalance() + request.getTotalDays());
+            employeeRepository.save(employee);
+        }
 
         request.setStatus(LeaveStatus.REJECTED);
         request.setApprovedBy(approvedBy);
@@ -96,6 +119,11 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public void cancelLeave(Long id) {
         LeaveRequest request = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
+        if (request.getStatus() == LeaveStatus.APPROVED) {
+            Employee employee = request.getEmployee();
+            employee.setLeaveBalance(employee.getLeaveBalance() + request.getTotalDays());
+            employeeRepository.save(employee);
+        }
         request.setStatus(LeaveStatus.CANCELLED);
         leaveRequestRepository.save(request);
     }
