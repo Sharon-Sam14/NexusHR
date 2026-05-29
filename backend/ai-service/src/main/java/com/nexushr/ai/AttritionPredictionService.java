@@ -29,6 +29,7 @@ import java.util.OptionalDouble;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class AttritionPredictionService {
 
     private final EmployeeRepository employeeRepository;

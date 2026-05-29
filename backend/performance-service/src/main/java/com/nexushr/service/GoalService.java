@@ -23,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
+@SuppressWarnings("null")
 public class GoalService {
 
     private final GoalRepository goalRepository;

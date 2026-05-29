@@ -28,6 +28,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
+@SuppressWarnings("null")
 public class RefreshTokenService {
 
     private static final long REFRESH_TOKEN_VALIDITY_MS = 7L * 24 * 60 * 60 * 1000; // 7 days

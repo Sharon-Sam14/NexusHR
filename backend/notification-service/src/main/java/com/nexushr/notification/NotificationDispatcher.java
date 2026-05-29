@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
+@SuppressWarnings("null")
 public class NotificationDispatcher {
 
     private final NotificationRepository notificationRepository;
