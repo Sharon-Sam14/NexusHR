@@ -69,7 +69,7 @@ export default function MainLayout({ children }) {
             response = "Workforce metrics look stable! No employees exhibit high attrition risk profiles right now.";
           }
         } else {
-          response = "Based on mock logs, David Lee exhibits a high attrition risk (78.5%) due to below-market salary adjustments. Recommendation: Schedule stay interview.";
+          response = "Based on mock logs, Amit Mehta exhibits a high attrition risk (78.5%) due to below-market salary adjustments. Recommendation: Schedule stay interview.";
         }
       } else if (query.includes("skill") || query.includes("gap") || query.includes("competency")) {
         if (insights?.skillGaps?.length) {
@@ -94,7 +94,7 @@ export default function MainLayout({ children }) {
             response += "All profiles show healthy engagement indexes above 80%.";
           }
         } else {
-          response = "Workforce engagement averages 88.5%. David Lee is lowest at 72.0% due to commute tardiness logs.";
+          response = "Workforce engagement averages 88.5%. Amit Mehta is lowest at 72.0% due to commute tardiness logs.";
         }
       } else if (query.includes("hello") || query.includes("hi") || query.includes("hey")) {
         response = "Hello! How can I assist you with HR predictive analytics today?";

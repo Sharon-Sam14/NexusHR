@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Briefcase, MapPin, DollarSign, Calendar, Search, Users, ExternalLink, FileText } from "lucide-react";
+import { Plus, Edit2, Trash2, Briefcase, MapPin, IndianRupee, Calendar, Search, Users, ExternalLink, FileText } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { recruitmentService } from "../../services/recruitmentService";
 import { departmentService } from "../../services/departmentService";
@@ -8,6 +8,7 @@ import DataTable from "../../components/DataTable";
 import Modal from "../../components/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog";
 import Badge from "../../components/Badge";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function Recruitment() {
   const { user, isHR } = useAuth();
@@ -170,7 +171,7 @@ export default function Recruitment() {
     {
       key: "salaryMin",
       label: "Salary Range",
-      render: (val, row) => row.salaryMax ? `$${val.toLocaleString()} - $${row.salaryMax.toLocaleString()}` : `$${val.toLocaleString()}`,
+      render: (val, row) => row.salaryMax ? `${formatCurrency(val)} – ${formatCurrency(row.salaryMax)}` : formatCurrency(val),
     },
     {
       key: "postedDate",
@@ -336,7 +337,7 @@ export default function Recruitment() {
               <label className="input-label">Min Salary (Monthly) *</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"
@@ -352,7 +353,7 @@ export default function Recruitment() {
               <label className="input-label">Max Salary (Monthly) *</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"
@@ -459,7 +460,7 @@ export default function Recruitment() {
               </div>
               <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
                 <span className="text-slate-500 uppercase font-semibold">Offered Compensation</span>
-                <p className="font-semibold text-cyan-400 mt-1">${currentJob.salaryMin.toLocaleString()} - ${currentJob.salaryMax.toLocaleString()} / mo</p>
+                <p className="font-semibold text-cyan-400 mt-1">{formatCurrency(currentJob.salaryMin)} – {formatCurrency(currentJob.salaryMax)} / mo</p>
               </div>
               <div className="p-3 rounded-xl bg-slate-900 border border-slate-800">
                 <span className="text-slate-500 uppercase font-semibold">Published Date</span>

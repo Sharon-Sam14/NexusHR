@@ -1,0 +1,16 @@
+com\nexushr\service\FeedbackAggregator$AggregationResult.class
+com\nexushr\service\ReviewCycleService$CycleSummary.class
+com\nexushr\controller\PerformanceController.class
+com\nexushr\entity\Goal.class
+com\nexushr\repository\PerformanceRepository.class
+com\nexushr\service\PerformanceService.class
+com\nexushr\entity\Goal$GoalBuilder.class
+com\nexushr\repository\GoalRepository.class
+com\nexushr\service\FeedbackAggregator$DimensionAverage.class
+com\nexushr\service\FeedbackAggregator.class
+com\nexushr\service\GoalService.class
+com\nexushr\service\ReviewCycleService.class
+com\nexushr\controller\GoalsReviewController.class
+com\nexushr\entity\Performance$PerformanceBuilder.class
+com\nexushr\entity\Performance.class
+com\nexushr\service\impl\PerformanceServiceImpl.class

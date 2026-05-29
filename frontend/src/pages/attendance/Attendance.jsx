@@ -10,17 +10,17 @@ import Modal from "../../components/Modal";
 import Badge from "../../components/Badge";
 
 const dummyEmployees = [
-  { id: 1, employeeName: "Alice Johnson", salary: 95000.0, department: "Engineering", designation: "Senior Engineer" },
-  { id: 2, employeeName: "Bob Smith", salary: 75000.0, department: "Human Resources", designation: "HR Manager" },
-  { id: 3, employeeName: "Carol Williams", salary: 80000.0, department: "Finance", designation: "Financial Analyst" },
-  { id: 4, employeeName: "David Lee", salary: 70000.0, department: "Marketing", designation: "Marketing Lead" },
-  { id: 5, employeeName: "Eva Martinez", salary: 72000.0, department: "Design", designation: "UI/UX Designer" }
+  { id: 1, employeeName: "Aarav Sharma", salary: 95000.0, department: "Engineering", designation: "Senior Engineer" },
+  { id: 2, employeeName: "Priya Patel", salary: 75000.0, department: "Human Resources", designation: "HR Manager" },
+  { id: 3, employeeName: "Rohan Das", salary: 80000.0, department: "Finance", designation: "Financial Analyst" },
+  { id: 4, employeeName: "Amit Mehta", salary: 70000.0, department: "Marketing", designation: "Marketing Lead" },
+  { id: 5, employeeName: "Anjali Nair", salary: 72000.0, department: "Design", designation: "UI/UX Designer" }
 ];
 
 const dummyAttendance = [
   {
     id: 1,
-    employee: { id: 1, employeeName: "Alice Johnson", department: "Engineering", designation: "Senior Engineer" },
+    employee: { id: 1, employeeName: "Aarav Sharma", department: "Engineering", designation: "Senior Engineer" },
     date: new Date().toISOString().split("T")[0],
     checkIn: "09:00:00",
     checkOut: "18:00:00",
@@ -30,7 +30,7 @@ const dummyAttendance = [
   },
   {
     id: 2,
-    employee: { id: 2, employeeName: "Bob Smith", department: "Human Resources", designation: "HR Manager" },
+    employee: { id: 2, employeeName: "Priya Patel", department: "Human Resources", designation: "HR Manager" },
     date: new Date().toISOString().split("T")[0],
     checkIn: "08:45:00",
     checkOut: "17:45:00",
@@ -40,7 +40,7 @@ const dummyAttendance = [
   },
   {
     id: 3,
-    employee: { id: 3, employeeName: "Carol Williams", department: "Finance", designation: "Financial Analyst" },
+    employee: { id: 3, employeeName: "Rohan Das", department: "Finance", designation: "Financial Analyst" },
     date: new Date().toISOString().split("T")[0],
     checkIn: "09:45:00",
     checkOut: "18:00:00",
@@ -50,7 +50,7 @@ const dummyAttendance = [
   },
   {
     id: 4,
-    employee: { id: 4, employeeName: "David Lee", department: "Marketing", designation: "Marketing Lead" },
+    employee: { id: 4, employeeName: "Amit Mehta", department: "Marketing", designation: "Marketing Lead" },
     date: new Date().toISOString().split("T")[0],
     checkIn: "13:00:00",
     checkOut: "18:00:00",
@@ -60,7 +60,7 @@ const dummyAttendance = [
   },
   {
     id: 5,
-    employee: { id: 5, employeeName: "Eva Martinez", department: "Design", designation: "UI/UX Designer" },
+    employee: { id: 5, employeeName: "Anjali Nair", department: "Design", designation: "UI/UX Designer" },
     date: new Date().toISOString().split("T")[0],
     checkIn: null,
     checkOut: null,
@@ -111,6 +111,53 @@ export default function Attendance() {
     }
   }, [selectedDate, user, authLoading]);
 
+  useEffect(() => {
+    if (isHR() && user?.email && !authLoading) {
+      const token = localStorage.getItem("nexushr_token");
+      const subscriberKey = encodeURIComponent(user.email);
+      const url = `http://localhost:8081/api/attendance/stream/${subscriberKey}?token=${token}`;
+      
+      console.log("[Attendance-SSE] Connecting to stream:", url);
+      const eventSource = new EventSource(url);
+      
+      eventSource.addEventListener("attendance-punch", (event) => {
+        try {
+          const punchData = JSON.parse(event.data);
+          console.log("[Attendance-SSE] Received punch event:", punchData);
+          
+          setRecords((prev) => {
+            const existsIdx = prev.findIndex(r => 
+              r.id === punchData.id || 
+              (r.employee?.id === punchData.employee?.id && r.date === punchData.date)
+            );
+            
+            if (existsIdx !== -1) {
+              const updated = [...prev];
+              updated[existsIdx] = punchData;
+              return updated;
+            } else {
+              if (punchData.date === selectedDate) {
+                return [punchData, ...prev];
+              }
+              return prev;
+            }
+          });
+        } catch (err) {
+          console.error("[Attendance-SSE] Failed to parse punch event:", err);
+        }
+      });
+      
+      eventSource.onerror = (err) => {
+        console.error("[Attendance-SSE] Connection error:", err);
+      };
+      
+      return () => {
+        console.log("[Attendance-SSE] Closing stream connection");
+        eventSource.close();
+      };
+    }
+  }, [isHR, user, selectedDate, authLoading]);
+
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -159,7 +206,7 @@ export default function Attendance() {
         console.warn("API check-in failed, simulating locally for demo", apiError);
         const mockRec = {
           id: Date.now(),
-          employee: { employeeName: user?.name || "Alice Johnson", department: "Engineering", designation: "Senior Engineer" },
+          employee: { employeeName: user?.name || "Aarav Sharma", department: "Engineering", designation: "Senior Engineer" },
           date: new Date().toISOString().split("T")[0],
           checkIn: new Date().toTimeString().split(" ")[0],
           checkOut: null,

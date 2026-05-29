@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Plus, Edit2, Trash2, Search, Filter, Briefcase, Mail, Phone, Calendar, DollarSign, User } from "lucide-react";
+import { Plus, Edit2, Trash2, Search, Filter, Briefcase, Mail, Phone, Calendar, IndianRupee, User } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { employeeService } from "../../services/employeeService";
 import { departmentService } from "../../services/departmentService";
+import { formatCurrency } from "../../utils/formatters";
 import DataTable from "../../components/DataTable";
 import Modal from "../../components/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog";
@@ -169,7 +170,7 @@ export default function Employees() {
     {
       key: "salary",
       label: "Salary",
-      render: (val) => typeof val === "number" ? `$${val.toLocaleString()}` : "—",
+      render: (val) => typeof val === "number" ? formatCurrency(val) : "—",
     },
     {
       key: "status",
@@ -359,7 +360,7 @@ export default function Employees() {
               <label className="input-label">Monthly Salary *</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"

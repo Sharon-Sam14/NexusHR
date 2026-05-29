@@ -17,7 +17,7 @@ function useCountUp(targetVal, duration = 800) {
     }
 
     const isPercent = valueString.includes("%");
-    const isDollar = valueString.includes("$");
+    const isRupee = valueString.includes("₹") || valueString.includes("₹");
     const start = 0;
     const end = target;
     const startTime = performance.now();
@@ -33,8 +33,8 @@ function useCountUp(targetVal, duration = 800) {
       let formatted = "";
       if (isPercent) {
         formatted = `${Math.round(currentVal)}%`;
-      } else if (isDollar) {
-        formatted = `$${Math.round(currentVal).toLocaleString()}`;
+      } else if (isRupee) {
+        formatted = `₹${Math.round(currentVal).toLocaleString("en-IN")}`;
       } else {
         formatted = Math.round(currentVal).toLocaleString();
       }

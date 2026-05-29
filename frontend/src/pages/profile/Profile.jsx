@@ -5,7 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { employeeService } from "../../services/employeeService";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import Badge from "../../components/Badge";
-import { formatFileSize } from "../../utils/formatters";
+import { formatFileSize, formatCurrency } from "../../utils/formatters";
 
 export default function Profile() {
   const { user } = useAuth();
@@ -277,7 +277,7 @@ export default function Profile() {
 
                 <div className="space-y-1">
                   <span className="text-slate-500 uppercase font-semibold">Compensation Plan</span>
-                  <p className="text-slate-200 text-sm font-medium mt-0.5">${employee.salary.toLocaleString()} / month</p>
+                  <p className="text-slate-200 text-sm font-medium mt-0.5">{formatCurrency(employee.salary)} / month</p>
                 </div>
               </div>
             ) : (

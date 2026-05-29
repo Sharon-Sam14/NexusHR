@@ -2,7 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
   LayoutDashboard, Users, Clock, Calendar,
-  DollarSign, Star, Briefcase, Bell,
+  IndianRupee, Star, Briefcase, Bell,
   User, LogOut, Sparkles, Building2
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
@@ -28,7 +28,7 @@ const navSections = [
     items: [
       { name: "Attendance", path: "/attendance", icon: Clock },
       { name: "Leave", path: "/leave", icon: Calendar },
-      { name: "Payroll", path: "/payroll", icon: DollarSign },
+      { name: "Payroll", path: "/payroll", icon: IndianRupee },
     ],
   },
   {

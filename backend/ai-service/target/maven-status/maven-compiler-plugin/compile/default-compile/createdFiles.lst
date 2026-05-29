@@ -1,0 +1,9 @@
+com\nexushr\ai\AttritionPredictionService.class
+com\nexushr\ai\SkillGapAnalyser.class
+com\nexushr\service\AiInsightsService.class
+com\nexushr\ai\HRChatbotService.class
+com\nexushr\ai\SkillGapAnalyser$SkillGap.class
+com\nexushr\service\impl\AiInsightsServiceImpl.class
+com\nexushr\ai\AttritionPredictionService$AttritionResult.class
+com\nexushr\ai\HRChatbotService$ChatResponse.class
+com\nexushr\controller\AiInsightsController.class

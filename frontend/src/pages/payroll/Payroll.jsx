@@ -1,26 +1,27 @@
 // NexusHR: Futuristic Smart HRMS payroll hub managing monthly basic salaries, allowances, deductions, taxes, and direct deposit slips.
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { DollarSign, Printer, Download, Eye, Plus, CheckCircle2, Search, Calendar, FileText } from "lucide-react";
+import { IndianRupee, Printer, Download, Eye, Plus, CheckCircle2, Search, Calendar, FileText } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { payrollService } from "../../services/payrollService";
 import { employeeService } from "../../services/employeeService";
 import DataTable from "../../components/DataTable";
 import Modal from "../../components/Modal";
 import Badge from "../../components/Badge";
+import { formatCurrency } from "../../utils/formatters";
 
 const dummyEmployees = [
-  { id: 1, employeeName: "Alice Johnson", salary: 95000.0, department: "Engineering", designation: "Senior Engineer" },
-  { id: 2, employeeName: "Bob Smith", salary: 75000.0, department: "Human Resources", designation: "HR Manager" },
-  { id: 3, employeeName: "Carol Williams", salary: 80000.0, department: "Finance", designation: "Financial Analyst" },
-  { id: 4, employeeName: "David Lee", salary: 70000.0, department: "Marketing", designation: "Marketing Lead" },
-  { id: 5, employeeName: "Eva Martinez", salary: 72000.0, department: "Design", designation: "UI/UX Designer" }
+  { id: 1, employeeName: "Aarav Sharma", salary: 95000.0, department: "Engineering", designation: "Senior Engineer" },
+  { id: 2, employeeName: "Priya Patel", salary: 75000.0, department: "Human Resources", designation: "HR Manager" },
+  { id: 3, employeeName: "Rohan Das", salary: 80000.0, department: "Finance", designation: "Financial Analyst" },
+  { id: 4, employeeName: "Amit Mehta", salary: 70000.0, department: "Marketing", designation: "Marketing Lead" },
+  { id: 5, employeeName: "Anjali Nair", salary: 72000.0, department: "Design", designation: "UI/UX Designer" }
 ];
 
 const dummyPayrolls = [
   {
     id: 1,
-    employeeName: "Alice Johnson",
+    employeeName: "Aarav Sharma",
     department: "Engineering",
     designation: "Senior Engineer",
     month: new Date().getMonth() + 1,
@@ -37,7 +38,7 @@ const dummyPayrolls = [
   },
   {
     id: 2,
-    employeeName: "Bob Smith",
+    employeeName: "Priya Patel",
     department: "Human Resources",
     designation: "HR Manager",
     month: new Date().getMonth() + 1,
@@ -54,7 +55,7 @@ const dummyPayrolls = [
   },
   {
     id: 3,
-    employeeName: "Carol Williams",
+    employeeName: "Rohan Das",
     department: "Finance",
     designation: "Financial Analyst",
     month: new Date().getMonth() + 1,
@@ -86,6 +87,13 @@ export default function Payroll() {
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
   const [isSlipOpen, setIsSlipOpen] = useState(false);
   const [selectedSlip, setSelectedSlip] = useState(null);
+  const [isBatchOpen, setIsBatchOpen] = useState(false);
+  const [batchForm, setBatchForm] = useState({
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    bonus: 0.0,
+    deductions: 0.0
+  });
 
   // Form State
   const [generateForm, setGenerateForm] = useState({
@@ -248,6 +256,53 @@ export default function Payroll() {
     }
   };
 
+  const handleDownloadPdfSlip = async (id, employeeName) => {
+    try {
+      const token = localStorage.getItem("nexushr_token");
+      const response = await fetch(`http://localhost:8081/api/payroll/${id}/pdf`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      const cleanName = employeeName ? employeeName.replace(/\s+/g, "_") : `employee_${id}`;
+      link.setAttribute("download", `payslip_${cleanName}_${selectedMonth}_${selectedYear}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      alert("Failed to download PDF payslip: " + error.message);
+    }
+  };
+
+  const handleOpenBatchModal = () => {
+    setBatchForm({
+      month: selectedMonth,
+      year: selectedYear,
+      bonus: 0.0,
+      deductions: 0.0
+    });
+    setIsBatchOpen(true);
+  };
+
+  const handleRunBatch = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await payrollService.runBatch(batchForm);
+      alert(response.message || "Payroll batch job successfully started in background.");
+      setIsBatchOpen(false);
+      fetchData();
+    } catch (error) {
+      alert("Failed to start payroll batch run: " + (error.response?.data?.message || error.message));
+    }
+  };
+
   // Month map
   const months = [
     "January", "February", "March", "April", "May", "June",
@@ -267,10 +322,15 @@ export default function Payroll() {
       ),
     },
     { key: "month", label: "Period", render: (val, row) => `${months[val - 1]} ${row.year}` },
-    { key: "basicSalary", label: "Basic", render: (val) => `$${val.toLocaleString()}` },
-    { key: "bonus", label: "Bonus", render: (val) => val ? `$${val.toLocaleString()}` : "$0" },
-    { key: "deductions", label: "Deduction", render: (val) => val ? `$${val.toLocaleString()}` : "$0" },
-    { key: "netSalary", label: "Net Payout", render: (val) => <span className="font-bold text-cyan-400">${val.toLocaleString()}</span> },
+    { key: "basicSalary", label: "Basic", render: (val) => formatCurrency(val) },
+    { key: "bonus", label: "Bonus", render: (val) => val ? formatCurrency(val) : formatCurrency(0) },
+    { key: "deductions", label: "Deduction", render: (val) => val ? formatCurrency(val) : formatCurrency(0) },
+    {
+      key: "overtimePay",
+      label: "Overtime",
+      render: (val, row) => (row.overtimeHours && row.overtimeHours > 0) ? `${row.overtimeHours.toFixed(1)} hrs (+${formatCurrency(val)})` : "—"
+    },
+    { key: "netSalary", label: "Net Payout", render: (val) => <span className="font-bold text-cyan-400">{formatCurrency(val)}</span> },
     { key: "status", label: "Status", render: (val) => <Badge status={val} label={val} /> },
   ];
 
@@ -308,10 +368,16 @@ export default function Payroll() {
           <p className="page-subtitle">Track payments, calculate deductions/bonuses, and generate payslips.</p>
         </div>
         {isHR() && (
-          <button onClick={handleOpenGenerate} className="btn-primary flex items-center gap-1.5">
-            <Plus size={16} />
-            <span>Generate Payroll</span>
-          </button>
+          <div className="flex gap-2">
+            <button onClick={handleOpenBatchModal} className="btn-secondary flex items-center gap-1.5">
+              <Calendar size={16} />
+              <span>Run Monthly Batch</span>
+            </button>
+            <button onClick={handleOpenGenerate} className="btn-primary flex items-center gap-1.5">
+              <Plus size={16} />
+              <span>Generate Payroll</span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -385,7 +451,7 @@ export default function Payroll() {
               >
                 <option value="">Select Employee</option>
                 {employees.map(emp => (
-                  <option key={emp.id} value={emp.id}>{emp.employeeName} (${emp.salary}/mo)</option>
+                  <option key={emp.id} value={emp.id}>{emp.employeeName} ({formatCurrency(emp.salary)}/mo)</option>
                 ))}
               </select>
             </div>
@@ -394,7 +460,7 @@ export default function Payroll() {
               <label className="input-label">Basic Base Salary *</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"
@@ -436,7 +502,7 @@ export default function Payroll() {
               <label className="input-label">Performance Bonus</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"
@@ -451,7 +517,7 @@ export default function Payroll() {
               <label className="input-label">Deductions (Unpaid leaves, etc.)</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"
@@ -466,7 +532,7 @@ export default function Payroll() {
               <label className="input-label">Estimated Income Tax</label>
               <div className="relative">
                 <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500">
-                  <DollarSign size={16} />
+                  <IndianRupee size={16} />
                 </span>
                 <input
                   type="number"
@@ -525,6 +591,78 @@ export default function Payroll() {
         </form>
       </Modal>
 
+      {/* Run Monthly Batch Modal */}
+      <Modal
+        isOpen={isBatchOpen}
+        onClose={() => setIsBatchOpen(false)}
+        title="Run Asynchronous Monthly Batch Payroll"
+        size="md"
+      >
+        <form onSubmit={handleRunBatch} className="space-y-4">
+          <p className="text-xs text-slate-400">
+            This triggers a background batch calculation process for all registered employees. 
+            Net payouts and income taxes will be automatically calculated based on attendance records, shift schedules, and standard tax brackets.
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="input-label">Period Month *</label>
+              <select
+                required
+                value={batchForm.month}
+                onChange={(e) => setBatchForm({ ...batchForm, month: parseInt(e.target.value) })}
+                className="select-field"
+              >
+                {months.map((m, idx) => (
+                  <option key={m} value={idx + 1}>{m}</option>
+                ))}
+              </select>
+            </div>
+            <div className="space-y-1">
+              <label className="input-label">Period Year *</label>
+              <input
+                type="number"
+                required
+                value={batchForm.year}
+                onChange={(e) => setBatchForm({ ...batchForm, year: parseInt(e.target.value) })}
+                className="input-field"
+              />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="input-label">Flat Bonus (Optional)</label>
+              <input
+                type="number"
+                value={batchForm.bonus}
+                onChange={(e) => setBatchForm({ ...batchForm, bonus: parseFloat(e.target.value) || 0 })}
+                className="input-field"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="input-label">Flat Deduction (Optional)</label>
+              <input
+                type="number"
+                value={batchForm.deductions}
+                onChange={(e) => setBatchForm({ ...batchForm, deductions: parseFloat(e.target.value) || 0 })}
+                className="input-field"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-700/50">
+            <button
+              type="button"
+              onClick={() => setIsBatchOpen(false)}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary">
+              Run Batch Job
+            </button>
+          </div>
+        </form>
+      </Modal>
+
       {/* Slip Print Modal */}
       <Modal
         isOpen={isSlipOpen}
@@ -570,19 +708,25 @@ export default function Payroll() {
               <div className="border-t border-b border-slate-800 py-4 space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Basic Base Salary</span>
-                  <span className="font-semibold text-white">${selectedSlip.basicSalary.toLocaleString()}</span>
+                  <span className="font-semibold text-white">{formatCurrency(selectedSlip.basicSalary)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Performance Bonus</span>
-                  <span className="font-semibold text-emerald-400">+${selectedSlip.bonus.toLocaleString()}</span>
+                  <span className="font-semibold text-emerald-400">+{formatCurrency(selectedSlip.bonus)}</span>
                 </div>
+                {selectedSlip.overtimeHours > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-400">Overtime Payout ({selectedSlip.overtimeHours.toFixed(1)} hrs @ 1.5x)</span>
+                    <span className="font-semibold text-emerald-400">+{formatCurrency(selectedSlip.overtimePay)}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-slate-400">Deductions</span>
-                  <span className="font-semibold text-red-400">-${selectedSlip.deductions.toLocaleString()}</span>
+                  <span className="font-semibold text-red-400">-{formatCurrency(selectedSlip.deductions)}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Estimated Income Tax</span>
-                  <span className="font-semibold text-red-400">-${selectedSlip.tax.toLocaleString()}</span>
+                  <span className="font-semibold text-red-400">-{formatCurrency(selectedSlip.tax)}</span>
                 </div>
               </div>
 
@@ -592,7 +736,7 @@ export default function Payroll() {
                   <span className="text-xs text-slate-500 uppercase font-semibold">Net Payout</span>
                   <p className="text-xs text-slate-600 mt-0.5">Direct Deposit</p>
                 </div>
-                <span className="text-2xl font-black text-cyan-400 font-mono">${selectedSlip.netSalary.toLocaleString()}</span>
+                <span className="text-2xl font-black text-cyan-400 font-mono">{formatCurrency(selectedSlip.netSalary)}</span>
               </div>
 
               <div className="flex justify-between items-center text-[10px] text-slate-600 border-t border-slate-800 pt-4">
@@ -615,6 +759,13 @@ export default function Payroll() {
               >
                 <Download size={14} />
                 <span>Download Excel/CSV</span>
+              </button>
+              <button
+                onClick={() => handleDownloadPdfSlip(selectedSlip.id, selectedSlip.employeeName)}
+                className="btn-primary flex items-center gap-1.5 text-xs py-2 bg-gradient-to-r from-cyan-500 to-blue-650 hover:from-cyan-450 hover:to-blue-550 border-0"
+              >
+                <Download size={14} />
+                <span>Download PDF Payslip</span>
               </button>
               <button
                 onClick={() => setIsSlipOpen(false)}

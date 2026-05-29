@@ -11,18 +11,18 @@ import ConfirmDialog from "../../components/ConfirmDialog";
 import Badge from "../../components/Badge";
 
 const dummyEmployees = [
-  { id: 1, employeeName: "Alice Johnson", salary: 95000.0, department: "Engineering", designation: "Senior Engineer" },
-  { id: 2, employeeName: "Bob Smith", salary: 75000.0, department: "Human Resources", designation: "HR Manager" },
-  { id: 3, employeeName: "Carol Williams", salary: 80000.0, department: "Finance", designation: "Financial Analyst" },
-  { id: 4, employeeName: "David Lee", salary: 70000.0, department: "Marketing", designation: "Marketing Lead" },
-  { id: 5, employeeName: "Eva Martinez", salary: 72000.0, department: "Design", designation: "UI/UX Designer" }
+  { id: 1, employeeName: "Aarav Sharma", salary: 95000.0, department: "Engineering", designation: "Senior Engineer" },
+  { id: 2, employeeName: "Priya Patel", salary: 75000.0, department: "Human Resources", designation: "HR Manager" },
+  { id: 3, employeeName: "Rohan Das", salary: 80000.0, department: "Finance", designation: "Financial Analyst" },
+  { id: 4, employeeName: "Amit Mehta", salary: 70000.0, department: "Marketing", designation: "Marketing Lead" },
+  { id: 5, employeeName: "Anjali Nair", salary: 72000.0, department: "Design", designation: "UI/UX Designer" }
 ];
 
 const dummyReviews = [
   {
     id: 1,
-    employee: { id: 1, employeeName: "Alice Johnson", department: "Engineering", designation: "Senior Engineer" },
-    employeeName: "Alice Johnson",
+    employee: { id: 1, employeeName: "Aarav Sharma", department: "Engineering", designation: "Senior Engineer" },
+    employeeName: "Aarav Sharma",
     reviewPeriod: "Q1 2026",
     reviewDate: new Date().toISOString().split("T")[0],
     overallRating: 4.5,
@@ -30,15 +30,15 @@ const dummyReviews = [
     qualityRating: 4.0,
     teamworkRating: 5.0,
     communicationRating: 4.5,
-    comments: "Alice is an outstanding Senior Engineer. She led the team during the API migration and has shown incredible technical and team leadership.",
-    goals: "Lead the frontend architecture modernization next quarter.",
-    reviewedBy: "Bob Smith",
+    comments: "Aarav is an outstanding Senior Engineer. He successfully led the engineering team during the API migration and has shown incredible technical leadership.",
+    goals: "Modernize the frontend routing and layout hierarchy next quarter.",
+    reviewedBy: "Priya Patel",
     status: "ACKNOWLEDGED"
   },
   {
     id: 2,
-    employee: { id: 3, employeeName: "Carol Williams", department: "Finance", designation: "Financial Analyst" },
-    employeeName: "Carol Williams",
+    employee: { id: 3, employeeName: "Rohan Das", department: "Finance", designation: "Financial Analyst" },
+    employeeName: "Rohan Das",
     reviewPeriod: "Q1 2026",
     reviewDate: new Date().toISOString().split("T")[0],
     overallRating: 4.0,
@@ -46,9 +46,9 @@ const dummyReviews = [
     qualityRating: 4.0,
     teamworkRating: 4.0,
     communicationRating: 4.0,
-    comments: "Carol manages our financial operations with great diligence. Her reports are consistently precise.",
-    goals: "Automate quarterly financial compliance reports.",
-    reviewedBy: "Bob Smith",
+    comments: "Rohan manages our financial operations with great diligence. His reports are consistently precise.",
+    goals: "Automate quarterly compliance metrics and audits.",
+    reviewedBy: "Priya Patel",
     status: "SUBMITTED"
   }
 ];
@@ -68,6 +68,31 @@ export default function Performance() {
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isViewOpen, setIsViewOpen] = useState(false);
   const [currentReview, setCurrentReview] = useState(null);
+
+  // Tabs
+  const [activeTab, setActiveTab] = useState("appraisals");
+
+  // Goals State
+  const [goals, setGoals] = useState([]);
+  const [goalsLoading, setGoalsLoading] = useState(false);
+  const [selectedGoalEmployee, setSelectedGoalEmployee] = useState("");
+  const [isGoalFormOpen, setIsGoalFormOpen] = useState(false);
+  const [isGoalProgressOpen, setIsGoalProgressOpen] = useState(false);
+  const [selectedGoal, setSelectedGoal] = useState(null);
+
+  const [goalForm, setGoalForm] = useState({
+    employeeId: "",
+    title: "",
+    description: "",
+    reviewPeriod: "Q1 2026",
+    targetDate: new Date().toISOString().split("T")[0],
+    setBy: user?.name || "HR"
+  });
+
+  const [progressForm, setProgressForm] = useState({
+    progressPercent: 0,
+    status: "NOT_STARTED"
+  });
 
   // Form State
   const [formData, setFormData] = useState({
@@ -117,6 +142,89 @@ export default function Performance() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGoals = async (employeeId) => {
+    if (!employeeId) return;
+    setGoalsLoading(true);
+    try {
+      const data = await performanceService.getGoalsByEmployee(employeeId);
+      setGoals(data);
+    } catch (error) {
+      console.warn("Failed to fetch goals, using mockup fallback", error);
+      setGoals([
+        { id: 101, title: "Modernize frontend routing", description: "Migrate routes and layouts to React Router 6 best practices.", progressPercent: 65, status: "IN_PROGRESS", reviewPeriod: "Q1 2026", targetDate: "2026-06-30", setBy: "Priya Patel" },
+        { id: 102, title: "Optimize index loads", description: "Improve page caching and index loading constraints.", progressPercent: 10, status: "NOT_STARTED", reviewPeriod: "Q1 2026", targetDate: "2026-07-15", setBy: "Priya Patel" }
+      ]);
+    } finally {
+      setGoalsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === "goals") {
+      const defaultEmpId = selectedGoalEmployee || user?.employee?.id || (employees[0]?.id ? employees[0].id.toString() : "");
+      if (defaultEmpId) {
+        setSelectedGoalEmployee(defaultEmpId);
+        fetchGoals(defaultEmpId);
+      }
+    }
+  }, [activeTab, selectedGoalEmployee, employees, user]);
+
+  const handleOpenAddGoal = () => {
+    setGoalForm({
+      employeeId: selectedGoalEmployee || user?.employee?.id || "",
+      title: "",
+      description: "",
+      reviewPeriod: "Q1 2026",
+      targetDate: new Date().toISOString().split("T")[0],
+      setBy: user?.name || "HR"
+    });
+    setIsGoalFormOpen(true);
+  };
+
+  const handleCreateGoal = async (e) => {
+    e.preventDefault();
+    try {
+      await performanceService.createGoal(goalForm);
+      setIsGoalFormOpen(false);
+      fetchGoals(selectedGoalEmployee);
+    } catch (error) {
+      alert("Failed to create goal: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleOpenEditGoalProgress = (goal) => {
+    setSelectedGoal(goal);
+    setProgressForm({
+      progressPercent: goal.progressPercent,
+      status: goal.status
+    });
+    setIsGoalProgressOpen(true);
+  };
+
+  const handleUpdateGoalProgress = async (e) => {
+    e.preventDefault();
+    if (!selectedGoal) return;
+    try {
+      await performanceService.updateGoalProgress(selectedGoal.id, progressForm.progressPercent);
+      await performanceService.updateGoalStatus(selectedGoal.id, progressForm.status);
+      setIsGoalProgressOpen(false);
+      fetchGoals(selectedGoalEmployee);
+    } catch (error) {
+      alert("Failed to update goal: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleDeleteGoal = async (id) => {
+    if (window.confirm("Are you sure you want to delete this goal?")) {
+      try {
+        await performanceService.deleteGoal(id);
+        fetchGoals(selectedGoalEmployee);
+      } catch (error) {
+        alert("Failed to delete goal: " + (error.response?.data?.message || error.message));
+      }
     }
   };
 
@@ -336,7 +444,7 @@ export default function Performance() {
           <h1 className="page-title">Performance Appraisals</h1>
           <p className="page-subtitle">Track scores, evaluate productivity, set goals, and review manager feedback.</p>
         </div>
-        {isHR() && (
+        {isHR() && activeTab === "appraisals" && (
           <button onClick={handleOpenAdd} className="btn-primary flex items-center gap-1.5">
             <Plus size={16} />
             <span>Create New Appraisal</span>
@@ -344,41 +452,169 @@ export default function Performance() {
         )}
       </div>
 
-      {/* Filter Bar */}
-      <div className="glass-card p-4 flex flex-col md:flex-row md:items-center gap-4">
-        <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
-            <Search size={18} />
-          </span>
-          <input
-            type="text"
-            placeholder="Search appraisals by name or evaluator..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="input-field pl-10"
-          />
-        </div>
-
-        <select
-          value={selectedPeriod}
-          onChange={(e) => setSelectedPeriod(e.target.value)}
-          className="select-field py-2 text-xs"
+      {/* Tabs */}
+      <div className="flex border-b border-slate-800/80 mb-4">
+        <button
+          onClick={() => setActiveTab("appraisals")}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+            activeTab === "appraisals"
+              ? "border-cyan-500 text-white"
+              : "border-transparent text-slate-555 hover:text-slate-350"
+          }`}
         >
-          <option value="">All Periods</option>
-          <option value="Q1 2026">Q1 2026</option>
-          <option value="Q4 2025">Q4 2025</option>
-          <option value="Q3 2025">Q3 2025</option>
-          <option value="2025 Annual">2025 Annual</option>
-        </select>
+          Appraisals
+        </button>
+        <button
+          onClick={() => setActiveTab("goals")}
+          className={`px-4 py-2.5 text-xs font-bold uppercase tracking-wider border-b-2 transition-all ${
+            activeTab === "goals"
+              ? "border-cyan-500 text-white"
+              : "border-transparent text-slate-555 hover:text-slate-350"
+          }`}
+        >
+          Goals & Milestones
+        </button>
       </div>
 
-      {/* Reviews Table */}
-      <DataTable
-        columns={columns}
-        data={filteredReviews}
-        loading={loading}
-        actions={actions}
-      />
+      {activeTab === "appraisals" ? (
+        <>
+          {/* Filter Bar */}
+          <div className="glass-card p-4 flex flex-col md:flex-row md:items-center gap-4">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                <Search size={18} />
+              </span>
+              <input
+                type="text"
+                placeholder="Search appraisals by name or evaluator..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="input-field pl-10"
+              />
+            </div>
+
+            <select
+              value={selectedPeriod}
+              onChange={(e) => setSelectedPeriod(e.target.value)}
+              className="select-field py-2 text-xs"
+            >
+              <option value="">All Periods</option>
+              <option value="Q1 2026">Q1 2026</option>
+              <option value="Q4 2025">Q4 2025</option>
+              <option value="Q3 2025">Q3 2025</option>
+              <option value="2025 Annual">2025 Annual</option>
+            </select>
+          </div>
+
+          {/* Reviews Table */}
+          <DataTable
+            columns={columns}
+            data={filteredReviews}
+            loading={loading}
+            actions={actions}
+          />
+        </>
+      ) : (
+        <div className="space-y-4">
+          {/* Goals Control Panel */}
+          {isHR() ? (
+            <div className="glass-card p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <User size={16} className="text-slate-400" />
+                <span className="text-xs font-semibold text-slate-400">Select Employee to View Goals:</span>
+                <select
+                  value={selectedGoalEmployee}
+                  onChange={(e) => setSelectedGoalEmployee(e.target.value)}
+                  className="select-field py-1.5 px-3 text-xs w-48"
+                >
+                  <option value="">Choose Employee</option>
+                  {employees.map(emp => (
+                    <option key={emp.id} value={emp.id}>{emp.employeeName} ({emp.department})</option>
+                  ))}
+                </select>
+              </div>
+              <button onClick={handleOpenAddGoal} disabled={!selectedGoalEmployee} className="btn-primary flex items-center gap-1.5 text-xs py-2">
+                <Plus size={14} />
+                <span>Create Growth Goal</span>
+              </button>
+            </div>
+          ) : (
+            <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-r from-slate-900 via-slate-800/80 to-indigo-950/20">
+              <p className="text-xs font-bold text-white uppercase tracking-wider">Your Assigned Growth Goals</p>
+              <p className="text-[10px] text-slate-400 mt-1">Review development milestone expectations and track progress with your manager.</p>
+            </div>
+          )}
+
+          {/* Goals List */}
+          {goalsLoading ? (
+            <div className="flex justify-center py-10">
+              <span className="w-8 h-8 border-2 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
+            </div>
+          ) : goals.length === 0 ? (
+            <div className="glass-card p-10 text-center text-xs text-slate-500">
+              {selectedGoalEmployee ? "No goals assigned to this employee." : "Please select an employee to view goals."}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {goals.map(goal => (
+                <div key={goal.id} className="glass-card p-5 border border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950/80 relative">
+                  <div className="flex justify-between items-start">
+                    <div className="space-y-1">
+                      <span className="text-[9px] uppercase font-extrabold px-2 py-0.5 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
+                        Period: {goal.reviewPeriod}
+                      </span>
+                      <h4 className="text-sm font-bold text-white pt-1">{goal.title}</h4>
+                      <p className="text-xs text-slate-400 leading-relaxed">{goal.description}</p>
+                    </div>
+                    {isHR() && (
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleOpenEditGoalProgress(goal)}
+                          className="btn-icon text-cyan-400 hover:text-cyan-300"
+                          title="Update Status/Progress"
+                        >
+                          <Edit2 size={13} />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGoal(goal.id)}
+                          className="btn-icon text-red-400 hover:text-red-300"
+                          title="Delete Goal"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="mt-5 space-y-2">
+                    <div className="flex justify-between items-center text-[10px]">
+                      <span className="text-slate-550">Progress:</span>
+                      <span className="font-bold text-white">{goal.progressPercent}%</span>
+                    </div>
+                    <div className="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-cyan-400 transition-all duration-300" 
+                        style={{ width: `${goal.progressPercent}%` }} 
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-between items-center text-[10px] mt-4 pt-3 border-t border-slate-850">
+                    <div className="flex items-center gap-1 text-slate-500">
+                      <Calendar size={11} />
+                      <span>Target: {new Date(goal.targetDate).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <span className="text-slate-500 mr-1">Status:</span>
+                      <Badge status={goal.status} label={goal.status.replace("_", " ")} />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Add / Edit Review Modal */}
       <Modal
@@ -614,7 +850,6 @@ export default function Performance() {
         )}
       </Modal>
 
-      {/* Delete Confirmation */}
       <ConfirmDialog
         isOpen={isDeleteOpen}
         onConfirm={handleDelete}
@@ -622,6 +857,128 @@ export default function Performance() {
         title="Delete Appraisal Record"
         message="Are you sure you want to delete this performance review? This action cannot be undone."
       />
+
+      {/* Create Goal Modal */}
+      <Modal
+        isOpen={isGoalFormOpen}
+        onClose={() => setIsGoalFormOpen(false)}
+        title="Assign Performance Goal"
+        size="md"
+      >
+        <form onSubmit={handleCreateGoal} className="space-y-4">
+          <div className="space-y-1">
+            <label className="input-label">Goal Title *</label>
+            <input
+              type="text"
+              required
+              value={goalForm.title}
+              onChange={(e) => setGoalForm({ ...goalForm, title: e.target.value })}
+              className="input-field"
+              placeholder="e.g. Lead the frontend architecture modernization"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="input-label">Goal Description *</label>
+            <textarea
+              required
+              value={goalForm.description}
+              onChange={(e) => setGoalForm({ ...goalForm, description: e.target.value })}
+              className="input-field h-24 resize-none"
+              placeholder="State the specific objectives and key results expected..."
+            />
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="input-label">Review Period *</label>
+              <input
+                type="text"
+                required
+                value={goalForm.reviewPeriod}
+                onChange={(e) => setGoalForm({ ...goalForm, reviewPeriod: e.target.value })}
+                className="input-field"
+                placeholder="e.g. Q1 2026"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="input-label">Target Date *</label>
+              <input
+                type="date"
+                required
+                value={goalForm.targetDate}
+                onChange={(e) => setGoalForm({ ...goalForm, targetDate: e.target.value })}
+                className="input-field"
+              />
+            </div>
+          </div>
+          <div className="flex justify-end gap-3 pt-4 border-t border-slate-700/50">
+            <button
+              type="button"
+              onClick={() => setIsGoalFormOpen(false)}
+              className="btn-secondary"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary">
+              Assign Goal
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Update Progress/Status Modal */}
+      <Modal
+        isOpen={isGoalProgressOpen}
+        onClose={() => setIsGoalProgressOpen(false)}
+        title="Update Goal Progress"
+        size="md"
+      >
+        {selectedGoal && (
+          <form onSubmit={handleUpdateGoalProgress} className="space-y-4">
+            <div className="space-y-1">
+              <label className="input-label">Goal Title</label>
+              <p className="text-xs font-semibold text-white">{selectedGoal.title}</p>
+            </div>
+            <div className="space-y-1">
+              <label className="input-label">Progress Percentage ({progressForm.progressPercent}%)</label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+                value={progressForm.progressPercent}
+                onChange={(e) => setProgressForm({ ...progressForm, progressPercent: parseInt(e.target.value) })}
+                className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-405"
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="input-label">Goal Status *</label>
+              <select
+                required
+                value={progressForm.status}
+                onChange={(e) => setProgressForm({ ...progressForm, status: e.target.value })}
+                className="select-field"
+              >
+                <option value="NOT_STARTED">Not Started</option>
+                <option value="IN_PROGRESS">In Progress</option>
+                <option value="COMPLETED">Completed</option>
+                <option value="DEFERRED">Deferred</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-700/50">
+              <button
+                type="button"
+                onClick={() => setIsGoalProgressOpen(false)}
+                className="btn-secondary"
+              >
+                Cancel
+              </button>
+              <button type="submit" className="btn-primary">
+                Update Goal
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
     </div>
   );
 }

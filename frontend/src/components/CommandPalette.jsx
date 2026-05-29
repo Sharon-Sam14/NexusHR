@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, Compass, User, Clock, Calendar, DollarSign, Sparkles, LogOut, Bell, Building2, Briefcase, Star } from "lucide-react";
+import { Search, Compass, User, Clock, Calendar, IndianRupee, Sparkles, LogOut, Bell, Building2, Briefcase, Star } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
 export default function CommandPalette({ isOpen, onClose }) {
@@ -20,8 +20,8 @@ export default function CommandPalette({ isOpen, onClose }) {
     { name: "Recruitment Portal", category: "Navigation", icon: Briefcase, action: () => navigate("/recruitment"), hrOnly: true },
     { name: "Clock In / Attendance", category: "Operations", icon: Clock, action: () => navigate("/attendance") },
     { name: "Apply for Leave", category: "Operations", icon: Calendar, action: () => navigate("/leave") },
-    { name: "Run Payroll / Salary", category: "Operations", icon: DollarSign, action: () => navigate("/payroll"), hrOnly: true },
-    { name: "My Payroll / Payslips", category: "Operations", icon: DollarSign, action: () => navigate("/payroll"), employeeOnly: true },
+    { name: "Run Payroll / Salary", category: "Operations", icon: IndianRupee, action: () => navigate("/payroll"), hrOnly: true },
+    { name: "My Payroll / Payslips", category: "Operations", icon: IndianRupee, action: () => navigate("/payroll"), employeeOnly: true },
     { name: "Performance Appraisals", category: "Growth", icon: Star, action: () => navigate("/performance") },
     { name: "AI Workforce Insights", category: "Growth", icon: Sparkles, action: () => navigate("/insights"), hrOnly: true },
     { name: "Account Profile", category: "Settings", icon: User, action: () => navigate("/profile") },

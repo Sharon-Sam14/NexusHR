@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Bell, BellOff, Check, CheckSquare, Trash, Calendar, DollarSign, Clock, ShieldAlert } from "lucide-react";
+import { Bell, BellOff, Check, CheckSquare, Trash, Calendar, IndianRupee, Clock, ShieldAlert } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { notificationService } from "../../services/notificationService";
 import Badge from "../../components/Badge";
@@ -55,7 +55,7 @@ export default function Notifications() {
       case "LEAVE":
         return <Calendar size={16} className="text-yellow-400" />;
       case "PAYROLL":
-        return <DollarSign size={16} className="text-emerald-400" />;
+        return <IndianRupee size={16} className="text-emerald-400" />;
       case "ATTENDANCE":
         return <Clock size={16} className="text-blue-400" />;
       default:

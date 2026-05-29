@@ -13,7 +13,7 @@ const dummyInsights = {
   attritionRisks: [
     {
       employeeId: 4,
-      employeeName: "David Lee",
+      employeeName: "Amit Mehta",
       riskLevel: "HIGH",
       riskPercentage: 78.5,
       reasons: ["Declining attendance rates", "Salary benchmarking below market value", "High average work hours (no overtime payout)"],
@@ -21,7 +21,7 @@ const dummyInsights = {
     },
     {
       employeeId: 3,
-      employeeName: "Carol Williams",
+      employeeName: "Rohan Das",
       riskLevel: "MEDIUM",
       riskPercentage: 42.0,
       reasons: ["Long time since last salary review", "High workload in financial year closing"],
@@ -29,7 +29,7 @@ const dummyInsights = {
     },
     {
       employeeId: 1,
-      employeeName: "Alice Johnson",
+      employeeName: "Aarav Sharma",
       riskLevel: "LOW",
       riskPercentage: 12.5,
       reasons: ["Consistent high performance scores", "Regular attendance logs"],
@@ -69,44 +69,44 @@ const dummyInsights = {
   engagementScores: [
     {
       employeeId: 1,
-      employeeName: "Alice Johnson",
+      employeeName: "Aarav Sharma",
       score: 95.0,
       attendanceRate: 100.0,
       performanceRating: 4.5
     },
     {
       employeeId: 2,
-      employeeName: "Bob Smith",
+      employeeName: "Priya Patel",
       score: 90.0,
       attendanceRate: 98.0,
       performanceRating: 4.0
     },
     {
       employeeId: 3,
-      employeeName: "Carol Williams",
+      employeeName: "Rohan Das",
       score: 85.0,
       attendanceRate: 95.0,
       performanceRating: 4.0
     },
     {
       employeeId: 4,
-      employeeName: "David Lee",
+      employeeName: "Amit Mehta",
       score: 72.0,
       attendanceRate: 85.0,
       performanceRating: 3.5
     },
     {
       employeeId: 5,
-      employeeName: "Eva Martinez",
+      employeeName: "Anjali Nair",
       score: 88.0,
       attendanceRate: 92.0,
       performanceRating: 4.2
     }
   ],
   aiRecommendations: [
-    "⚠️ High Attrition Warning: David Lee (Marketing) has a 78.5% attrition probability due to low compensation benchmarks. Recommendation: Initiate stay interview and adjust base salary.",
+    "⚠️ High Attrition Warning: Amit Mehta (Marketing) has a 78.5% attrition probability due to low compensation benchmarks. Recommendation: Initiate stay interview and adjust base salary.",
     "Skill Gap Alert: HR department exhibits a 50% gap in Biometric Integration APIs. Plan Q2 training course.",
-    "Engagement Alert: David Lee engagement index is at 72%. Schedule check-in regarding attendance constraints."
+    "Engagement Alert: Amit Mehta engagement index is at 72%. Schedule check-in regarding attendance constraints."
   ]
 };
 
@@ -133,14 +133,16 @@ export default function AiInsights() {
     }
   };
 
-  const askAi = (question) => {
+  const askAi = async (question) => {
     setActiveQuestion(question);
     setChatLoading(true);
     setAiAnswer("");
 
-    // Simulate AI computing with >80% accuracy based on real database records
-    setTimeout(() => {
-      setChatLoading(false);
+    try {
+      const res = await aiService.chat(question);
+      setAiAnswer(res.answer);
+    } catch (error) {
+      console.warn("Failed to query backend AI chatbot, using local fallback", error);
       if (!data) return;
 
       if (question.includes("attrition")) {
@@ -172,7 +174,7 @@ export default function AiInsights() {
           setAiAnswer("Our Skill Gap Analysis shows high competency alignment across all departments. No gaps exceed the 20% warning threshold.");
         }
       } else if (question.includes("engagement")) {
-        const avgEng = data.engagementScores.reduce((acc, curr) => acc + curr.score, 0) / data.engagementScores.size || 88.5;
+        const avgEng = data.engagementScores.reduce((acc, curr) => acc + curr.score, 0) / data.engagementScores.length || 88.5;
         const lowEng = data.engagementScores.filter(s => s.score < 80.0);
         
         let answer = `The current workforce Engagement Score stands at **${avgEng.toFixed(1)}%**.\n\n`;
@@ -190,7 +192,9 @@ export default function AiInsights() {
           `${data.aiRecommendations[0] || "All metrics healthy."}`
         );
       }
-    }, 900);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   if (loading) {

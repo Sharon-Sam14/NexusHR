@@ -31,13 +31,16 @@ export function AuthProvider({ children }) {
 
   const login = async (email, password) => {
     const data = await authService.login(email, password);
-    const { token, ...userInfo } = data;
+    const { token, refreshToken, ...userInfo } = data;
 
     if (userInfo.employeeId) {
       userInfo.employee = { id: userInfo.employeeId };
     }
 
     localStorage.setItem("nexushr_token", token);
+    if (refreshToken) {
+      localStorage.setItem("nexushr_refresh_token", refreshToken);
+    }
     localStorage.setItem("nexushr_user", JSON.stringify(userInfo));
 
     setToken(token);
@@ -45,8 +48,14 @@ export function AuthProvider({ children }) {
     return data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (e) {
+      console.warn("Backend logout failed", e);
+    }
     localStorage.removeItem("nexushr_token");
+    localStorage.removeItem("nexushr_refresh_token");
     localStorage.removeItem("nexushr_user");
     setToken(null);
     setUser(null);

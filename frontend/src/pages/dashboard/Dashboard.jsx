@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
-  Users, Clock, Calendar, DollarSign, Star, Briefcase,
+  Users, Clock, Calendar, IndianRupee, Star, Briefcase,
   TrendingUp, Activity, Plus, FileText, Send, Sparkles
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
@@ -10,6 +10,7 @@ import StatsCard from "../../components/StatsCard";
 import AreaChartWidget from "../../components/charts/AreaChartWidget";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import { Link } from "react-router-dom";
+import { formatCurrency } from "../../utils/formatters";
 
 export default function Dashboard() {
   const { user, isHR } = useAuth();
@@ -119,9 +120,9 @@ export default function Dashboard() {
             />
             <StatsCard
               title="Monthly Payroll"
-              value={`$${(stats?.totalPayrollThisMonth || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+              value={formatCurrency(stats?.totalPayrollThisMonth || 0)}
               subtitle="All payroll status"
-              icon={DollarSign}
+              icon={IndianRupee}
               color="emerald"
               index={3}
             />
@@ -154,9 +155,9 @@ export default function Dashboard() {
             />
             <StatsCard
               title="My Monthly Payout"
-              value={`$${(stats?.totalPayrollThisMonth || 0).toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
+              value={formatCurrency(stats?.totalPayrollThisMonth || 0)}
               subtitle="Net salary this month"
-              icon={DollarSign}
+              icon={IndianRupee}
               color="emerald"
               index={3}
             />
@@ -175,7 +176,7 @@ export default function Dashboard() {
               dataKeys={["Employees", "Attendance"]}
             />
             <AreaChartWidget
-              title="Payroll Expenses ($)"
+              title="Payroll Expenses (₹)"
               data={trendData}
               dataKeys={["Expenses"]}
             />
@@ -201,7 +202,7 @@ export default function Dashboard() {
                   to="/payroll"
                   className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/40 border border-slate-700/40 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all text-center group"
                 >
-                  <DollarSign size={20} className="text-slate-400 group-hover:text-emerald-400 mb-1.5" />
+                  <IndianRupee size={20} className="text-slate-400 group-hover:text-emerald-400 mb-1.5" />
                   <span className="text-xs font-medium text-slate-300 group-hover:text-white">Run Payroll</span>
                 </Link>
                 <Link
@@ -416,7 +417,7 @@ export default function Dashboard() {
                   to="/payroll"
                   className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-800/40 border border-slate-700/40 hover:bg-emerald-500/10 hover:border-emerald-500/30 transition-all text-center group"
                 >
-                  <DollarSign size={20} className="text-slate-400 group-hover:text-emerald-400 mb-1.5" />
+                  <IndianRupee size={20} className="text-slate-400 group-hover:text-emerald-400 mb-1.5" />
                   <span className="text-xs font-medium text-slate-300 group-hover:text-white">My Payroll</span>
                 </Link>
                 <Link

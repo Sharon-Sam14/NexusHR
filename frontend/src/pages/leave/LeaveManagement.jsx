@@ -12,32 +12,32 @@ import Badge from "../../components/Badge";
 const dummyLeaves = [
   {
     id: 1,
-    employee: { id: 1, employeeName: "Alice Johnson", department: "Engineering" },
+    employee: { id: 1, employeeName: "Aarav Sharma", department: "Engineering" },
     leaveType: "SICK",
     startDate: new Date(Date.now() - 10 * 86400000).toISOString().split("T")[0],
     endDate: new Date(Date.now() - 8 * 86400000).toISOString().split("T")[0],
     totalDays: 3,
-    reason: "Flu and fever",
+    reason: "Suffering from Viral Fever",
     status: "APPROVED"
   },
   {
     id: 2,
-    employee: { id: 3, employeeName: "Carol Williams", department: "Finance" },
+    employee: { id: 3, employeeName: "Rohan Das", department: "Finance" },
     leaveType: "ANNUAL",
     startDate: new Date(Date.now() + 10 * 86400000).toISOString().split("T")[0],
     endDate: new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0],
     totalDays: 5,
-    reason: "Family vacation to Hawaii",
+    reason: "Diwali festival celebrations with family in Jaipur",
     status: "PENDING"
   },
   {
     id: 3,
-    employee: { id: 4, employeeName: "David Lee", department: "Marketing" },
+    employee: { id: 4, employeeName: "Amit Mehta", department: "Marketing" },
     leaveType: "CASUAL",
     startDate: new Date(Date.now() - 5 * 86400000).toISOString().split("T")[0],
     endDate: new Date(Date.now() - 4 * 86400000).toISOString().split("T")[0],
     totalDays: 2,
-    reason: "Personal work",
+    reason: "Urgent domestic work at home",
     status: "REJECTED"
   }
 ];
@@ -45,9 +45,11 @@ const dummyLeaves = [
 export default function LeaveManagement() {
   const { user, isHR, loading: authLoading } = useAuth();
   const [leaves, setLeaves] = useState([]);
+  const [personalLeaves, setPersonalLeaves] = useState([]);
   const [pendingLeaves, setPendingLeaves] = useState([]);
   const [employee, setEmployee] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [viewMode, setViewMode] = useState(isHR() ? "manage" : "personal");
 
   // Apply Form
   const [isApplyOpen, setIsApplyOpen] = useState(false);
@@ -71,6 +73,8 @@ export default function LeaveManagement() {
 
   useEffect(() => {
     if (!authLoading) {
+      // Re-initialize viewMode if user auth status updates
+      setViewMode(isHR() ? "manage" : "personal");
       fetchData();
     }
   }, [user, authLoading]);
@@ -79,23 +83,41 @@ export default function LeaveManagement() {
     setLoading(true);
     try {
       if (isHR()) {
-        const [allData, pendingData] = await Promise.all([
-          leaveService.getAll(),
-          leaveService.getPending(),
-        ]);
+        const promises = [
+          leaveService.getAll().catch(() => []),
+          leaveService.getPending().catch(() => []),
+        ];
+        if (user?.employee?.id) {
+          promises.push(leaveService.getByEmployee(user.employee.id).catch(() => []));
+          promises.push(employeeService.getById(user.employee.id).catch(() => null));
+        }
+        const results = await Promise.all(promises);
+        const allData = results[0];
+        const pendingData = results[1];
         setLeaves(allData.length > 0 ? allData : dummyLeaves);
         setPendingLeaves(pendingData.length > 0 ? pendingData : dummyLeaves.filter(l => l.status === "PENDING"));
+        if (user?.employee?.id) {
+          const myData = results[2];
+          const empData = results[3];
+          setPersonalLeaves(myData.length > 0 ? myData : dummyLeaves.filter(l => l.employee?.id === user.employee.id));
+          if (empData) {
+            setEmployee(empData);
+          }
+        }
       } else if (user?.employee?.id) {
         const [myData, empData] = await Promise.all([
-          leaveService.getByEmployee(user.employee.id),
+          leaveService.getByEmployee(user.employee.id).catch(() => []),
           employeeService.getById(user.employee.id).catch(() => null)
         ]);
-        setLeaves(myData.length > 0 ? myData : dummyLeaves.filter(l => l.employee?.employeeName === user.name));
+        const finalMyData = myData.length > 0 ? myData : dummyLeaves.filter(l => l.employee?.id === user.employee.id);
+        setLeaves(finalMyData);
+        setPersonalLeaves(finalMyData);
         if (empData) {
           setEmployee(empData);
         }
       } else {
         setLeaves(dummyLeaves);
+        setPersonalLeaves(dummyLeaves);
       }
     } catch (error) {
       console.error("Failed to load leave requests", error);
@@ -273,13 +295,16 @@ export default function LeaveManagement() {
   ];
 
   // Filter list
-  const filteredLeaves = leaves.filter(l => {
+  const leavesToFilter = (isHR() && viewMode === "manage") ? leaves : personalLeaves;
+  const filteredLeaves = leavesToFilter.filter(l => {
     const matchStatus = !selectedStatus || l.status === selectedStatus;
     const matchSearch = !searchTerm ||
       l.employee?.employeeName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       l.leaveType.toLowerCase().includes(searchTerm.toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  const activeColumns = (isHR() && viewMode === "manage") ? adminColumns : employeeColumns;
 
   return (
     <div className="space-y-6">
@@ -289,7 +314,7 @@ export default function LeaveManagement() {
           <h1 className="page-title">Leave Management</h1>
           <p className="page-subtitle">Submit leave applications, view balances, and approve time-off requests.</p>
         </div>
-        {!isHR() && (
+        {(viewMode === "personal" || !isHR()) && (
           <button onClick={handleOpenApply} className="btn-primary flex items-center gap-1.5">
             <Plus size={16} />
             <span>Apply for Leave</span>
@@ -297,8 +322,34 @@ export default function LeaveManagement() {
         )}
       </div>
 
-      {/* Leave Balance Overview (for Employees) */}
-      {!isHR() && (
+      {/* View Switcher Tabs (Only for HR/Admin) */}
+      {isHR() && (
+        <div className="flex border-b border-slate-800">
+          <button
+            onClick={() => setViewMode("manage")}
+            className={`px-5 py-2.5 font-semibold text-xs border-b-2 transition-all ${
+              viewMode === "manage"
+                ? "border-cyan-500 text-cyan-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            Manage Requests
+          </button>
+          <button
+            onClick={() => setViewMode("personal")}
+            className={`px-5 py-2.5 font-semibold text-xs border-b-2 transition-all ${
+              viewMode === "personal"
+                ? "border-cyan-500 text-cyan-400"
+                : "border-transparent text-slate-400 hover:text-slate-200"
+            }`}
+          >
+            My Leaves
+          </button>
+        </div>
+      )}
+
+      {/* Leave Balance Overview (for Employees and personal view mode) */}
+      {(viewMode === "personal" || !isHR()) && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950/10">
             <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Leave Balance Pool</span>
@@ -308,14 +359,14 @@ export default function LeaveManagement() {
           <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950/10">
             <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Approved Leave Days</span>
             <p className="text-2xl font-black text-emerald-450 mt-1">
-              {leaves.filter(l => l.status === "APPROVED").reduce((sum, l) => sum + l.totalDays, 0)} days
+              {personalLeaves.filter(l => l.status === "APPROVED").reduce((sum, l) => sum + l.totalDays, 0)} days
             </p>
             <p className="text-xs text-slate-400 mt-1">Total time-off logged this year</p>
           </div>
           <div className="glass-card p-5 border border-slate-700/50 bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950/10">
             <span className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider">Pending Approvals</span>
             <p className="text-2xl font-black text-yellow-450 mt-1">
-              {leaves.filter(l => l.status === "PENDING").reduce((sum, l) => sum + l.totalDays, 0)} days
+              {personalLeaves.filter(l => l.status === "PENDING").reduce((sum, l) => sum + l.totalDays, 0)} days
             </p>
             <p className="text-xs text-slate-400 mt-1">Awaiting HR/Manager review</p>
           </div>
@@ -323,7 +374,7 @@ export default function LeaveManagement() {
       )}
 
       {/* HR Pending Approvals Queue */}
-      {isHR() && pendingLeaves.length > 0 && (
+      {isHR() && viewMode === "manage" && pendingLeaves.length > 0 && (
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-amber-400 flex items-center gap-1.5">
             <AlertCircle size={16} />
@@ -367,9 +418,11 @@ export default function LeaveManagement() {
 
       {/* Leave Application History Table */}
       <div className="space-y-3">
-        <h2 className="text-sm font-semibold text-white">Leave History</h2>
+        <h2 className="text-sm font-semibold text-white">
+          {viewMode === "manage" ? "Global Leave History" : "My Leave History"}
+        </h2>
         <DataTable
-          columns={isHR() ? adminColumns : employeeColumns}
+          columns={activeColumns}
           data={filteredLeaves}
           loading={loading}
         />
