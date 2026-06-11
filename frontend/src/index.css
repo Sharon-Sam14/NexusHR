@@ -1,0 +1,550 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ==========================================================================
+   DESIGN TOKENS — NexusHR Enterprise SaaS Theme
+   ========================================================================== */
+
+/* ══════════════════════════════════════════
+   LIGHT MODE (default / :root)
+══════════════════════════════════════════ */
+:root {
+  /* Typography */
+  --font-ui:      'DM Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+
+  /* Legacy aliases (keep for existing components) */
+  --font-display: var(--font-heading);
+  --font-body:    var(--font-ui);
+
+  /* Page & surface backgrounds */
+  --bg-body:         #F4F6FA;
+  --bg-sidebar:      #0F1117;
+  --bg-card:         #FFFFFF;
+  --bg-card-alt:     #F9FAFB;
+  --bg-input:        #F3F4F6;
+  --bg-hover:        #F0F2F7;
+
+  /* Legacy surface aliases */
+  --surface-base:     var(--bg-body);
+  --surface-card:     var(--bg-card);
+  --surface-sidebar:  var(--bg-sidebar);
+  --surface-elevated: var(--bg-card);
+  --surface-input:    var(--bg-input);
+  --bg-app:           var(--bg-body);
+
+  /* Text */
+  --text-primary:    #0D0F14;
+  --text-secondary:  #5C6370;
+  --text-muted:      #9CA3AF;
+  --text-inverted:   #FFFFFF;
+  --text-sidebar:    #A0A8B8;
+  --text-sidebar-active: #FFFFFF;
+
+  /* Legacy text aliases */
+  --text-main:      var(--text-primary);
+
+  /* Borders */
+  --border-card:     rgba(0, 0, 0, 0.06);
+  --border-input:    #E5E7EB;
+  --border-divider:  #F0F1F3;
+  --border-default:  rgba(0, 0, 0, 0.08);
+  --border-card-hover: rgba(37, 99, 235, 0.3);
+  --border-input-focus: #2563EB;
+
+  /* Brand — Blue-based */
+  --brand-blue:      #2563EB;
+  --brand-blue-soft: #EFF4FF;
+  --brand-blue-mid:  rgba(37, 99, 235, 0.12);
+
+  /* Legacy brand alias */
+  --brand-primary:      var(--brand-blue);
+  --brand-primary-dim:  var(--brand-blue-mid);
+  --brand-primary-text: var(--brand-blue);
+  --brand-accent:       #7C3AED;
+
+  /* Status colors */
+  --color-success:    #16A34A;
+  --color-success-bg: #DCFCE7;
+  --color-warning:    #D97706;
+  --color-warning-bg: #FEF3C7;
+  --color-danger:     #DC2626;
+  --color-danger-bg:  #FEE2E2;
+  --color-info:       #0EA5E9;
+  --color-info-bg:    #E0F2FE;
+  --color-purple:     #7C3AED;
+  --color-purple-bg:  #EDE9FE;
+
+  /* Legacy status aliases */
+  --brand-success: var(--color-success);
+  --brand-warning: var(--color-warning);
+  --brand-danger:  var(--color-danger);
+  --brand-info:    var(--color-info);
+
+  /* Shadows */
+  --shadow-card:        0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.05);
+  --shadow-card-hover:  0 4px 12px rgba(0,0,0,0.08), 0 12px 32px rgba(0,0,0,0.07);
+  --shadow-dropdown:    0 8px 24px rgba(0,0,0,0.12);
+  --shadow-modal:       0 16px 48px rgba(0,0,0,0.14);
+  --shadow-topbar:      0 1px 0 rgba(0,0,0,0.06);
+  --shadow-sidebar:     1px 0 0 rgba(0,0,0,0.08);
+
+  /* Tailwind Slate Scale RGB values for config compatibility */
+  --slate-50-rgb: 248 250 252;
+  --slate-100-rgb: 241 245 249;
+  --slate-200-rgb: 226 232 240;
+  --slate-300-rgb: 203 213 225;
+  --slate-400-rgb: 148 163 184;
+  --slate-500-rgb: 100 116 139;
+  --slate-600-rgb: 71 85 105;
+  --slate-700-rgb: 51 65 85;
+  --slate-800-rgb: 30 41 59;
+  --slate-900-rgb: 15 23 42;
+  --slate-950-rgb: 2 6 23;
+
+  /* Aero dynamic color tokens */
+  --canvas-bg: #f8f9fa;        /* Clean, soft off-white */
+  --ink-primary: #0c0d0e;      /* Deep midnight charcoal */
+  --ink-secondary: #565d64;    /* Slate gray for structural hierarchy */
+  --border-subtle: #e9ecef;    /* Light definition line */
+  --shadow-ambient: rgba(0, 0, 0, 0.04);
+}
+
+/* ══════════════════════════════════════════
+   DARK MODE (.dark class on <html>)
+══════════════════════════════════════════ */
+.dark {
+  --bg-body:         #0D0F14;
+  --bg-sidebar:      #080A0E;
+  --bg-card:         #161A23;
+  --bg-card-alt:     #1C2030;
+  --bg-input:        #1C2030;
+  --bg-hover:        #1E2333;
+
+  --surface-base:     var(--bg-body);
+  --surface-card:     var(--bg-card);
+  --surface-sidebar:  var(--bg-sidebar);
+  --surface-elevated: var(--bg-card);
+  --surface-input:    var(--bg-input);
+  --bg-app:           var(--bg-body);
+
+  --text-primary:    #E8ECF4;
+  --text-secondary:  #8B95A8;
+  --text-muted:      #4F586A;
+  --text-inverted:   #0D0F14;
+  --text-sidebar:    #6B7485;
+  --text-sidebar-active: #FFFFFF;
+
+  --text-main:      var(--text-primary);
+
+  --border-card:     rgba(255,255,255,0.06);
+  --border-input:    rgba(255,255,255,0.08);
+  --border-divider:  rgba(255,255,255,0.05);
+  --border-default:  rgba(255,255,255,0.07);
+  --border-card-hover: rgba(59,130,246,0.4);
+  --border-input-focus: #3B82F6;
+
+  --brand-blue:      #3B82F6;
+  --brand-blue-soft: rgba(59,130,246,0.12);
+  --brand-blue-mid:  rgba(59,130,246,0.15);
+  --brand-primary:      var(--brand-blue);
+  --brand-primary-dim:  var(--brand-blue-mid);
+  --brand-primary-text: var(--brand-blue);
+
+  --color-success-bg: rgba(22,163,74,0.15);
+  --color-warning-bg: rgba(217,119,6,0.15);
+  --color-danger-bg:  rgba(220,38,38,0.15);
+  --color-info-bg:    rgba(14,165,233,0.15);
+  --color-purple-bg:  rgba(124,58,237,0.15);
+
+  --shadow-card:        0 1px 3px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.2);
+  --shadow-card-hover:  0 4px 12px rgba(0,0,0,0.4), 0 12px 32px rgba(0,0,0,0.3);
+  --shadow-dropdown:    0 8px 24px rgba(0,0,0,0.5);
+  --shadow-modal:       0 16px 48px rgba(0,0,0,0.6);
+  --shadow-topbar:      0 1px 0 rgba(255,255,255,0.04);
+  --shadow-sidebar:     1px 0 0 rgba(255,255,255,0.04);
+
+  /* Aero dark mode overrides */
+  --canvas-bg: #0a0b0d;      /* Obsidian dark core */
+  --ink-primary: #f1f3f5;    /* Crisp, low-strain ice white */
+  --ink-secondary: #868e96;  /* Muted silver for body text */
+  --border-subtle: #1a1d21;  /* Low-glow border */
+  --shadow-ambient: rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   BASE STYLES
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+input, select, textarea, button {
+  font-family: inherit;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-body);
+  color: var(--text-primary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+/* Heading font */
+h1, h2, h3, h4, h5, h6, .text-display, .display-heading {
+  font-family: var(--font-heading);
+}
+
+/* Mono/tabular data */
+.font-mono, .font-data, td.numeric, .stat-value, .badge-count, .tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ==========================================================================
+   CUSTOM SCROLLBAR
+   ========================================================================== */
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-card); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-blue); }
+
+/* ==========================================================================
+   COMPONENT LAYER
+   ========================================================================== */
+
+@layer components {
+
+  /* ── Card ──────────────────────────────────────────────────────────── */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-card);
+    border-radius: 16px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .card-hover:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+    cursor: pointer;
+  }
+
+  /* Legacy glass-card alias */
+  .glass-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-card);
+    border-radius: 16px;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
+  }
+
+  .glass-card:hover {
+    box-shadow: var(--shadow-card-hover);
+    transform: translateY(-2px);
+  }
+
+  /* ── Buttons ────────────────────────────────────────────────────────── */
+  .btn-primary {
+    background: var(--brand-blue);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+    font-family: var(--font-ui);
+    @apply px-4 py-2 rounded-[10px] font-semibold text-[13px]
+           hover:opacity-90 active:scale-[0.98]
+           transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-secondary {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-card);
+    font-family: var(--font-ui);
+    @apply px-4 py-2 rounded-[10px] font-medium text-[13px]
+           hover:border-[var(--border-card-hover)]
+           active:scale-[0.98] transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-danger {
+    background: var(--color-danger-bg);
+    border: 1px solid rgba(220, 38, 38, 0.2);
+    color: var(--color-danger);
+    font-family: var(--font-ui);
+    @apply px-4 py-2 rounded-[10px] font-semibold text-[13px]
+           hover:opacity-90 active:scale-[0.98] transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-success {
+    background: var(--color-success-bg);
+    border: 1px solid rgba(22, 163, 74, 0.2);
+    color: var(--color-success);
+    font-family: var(--font-ui);
+    @apply px-4 py-2 rounded-[10px] font-semibold text-[13px]
+           hover:opacity-90 active:scale-[0.98] transition-all duration-150
+           disabled:opacity-40 disabled:cursor-not-allowed select-none;
+  }
+
+  .btn-icon {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    color: var(--text-secondary);
+    @apply w-9 h-9 rounded-[10px] flex items-center justify-center
+           hover:border-[var(--border-card-hover)] transition-all duration-150 active:scale-95;
+  }
+
+  /* ── Form Inputs ────────────────────────────────────────────────────── */
+  .input-field {
+    background: var(--bg-card);
+    border: 1px solid var(--border-input);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    @apply w-full rounded-[10px] px-3 py-2.5 text-[13px]
+           placeholder:text-[var(--text-muted)]
+           focus:outline-none
+           transition-all duration-150;
+  }
+
+  .input-field:focus {
+    border-color: var(--border-input-focus);
+    box-shadow: 0 0 0 3px var(--brand-blue-mid);
+  }
+
+  .input-label {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    @apply block text-[11px] font-semibold uppercase tracking-[0.08em] mb-1.5;
+  }
+
+  .select-field {
+    background: var(--bg-card);
+    border: 1px solid var(--border-input);
+    color: var(--text-primary);
+    font-family: var(--font-ui);
+    @apply w-full rounded-[10px] px-3 py-2.5 text-[13px]
+           focus:outline-none
+           transition-all duration-150 cursor-pointer;
+  }
+
+  .select-field:focus {
+    border-color: var(--border-input-focus);
+    box-shadow: 0 0 0 3px var(--brand-blue-mid);
+  }
+
+  /* ── DataTable ──────────────────────────────────────────────────────── */
+  .table-container {
+    border: 1px solid var(--border-card);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-card);
+    @apply overflow-x-auto rounded-[16px];
+  }
+
+  .table-base {
+    @apply w-full text-[13px] text-left;
+    border-collapse: collapse;
+  }
+
+  .table-head {
+    background: var(--bg-card-alt);
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border-divider);
+    font-family: var(--font-mono);
+    @apply uppercase tracking-[0.08em] text-[11px] sticky top-0 z-10;
+  }
+
+  .table-th {
+    @apply px-5 py-3.5 font-semibold;
+  }
+
+  .table-row {
+    border-bottom: 1px solid var(--border-divider);
+    @apply transition-colors duration-100;
+  }
+
+  .table-row:hover {
+    background: var(--bg-hover);
+  }
+
+  .table-td {
+    color: var(--text-secondary);
+    @apply px-5 py-3.5;
+  }
+
+  /* ── Nav Sidebar ────────────────────────────────────────────────────── */
+  .nav-item {
+    color: var(--text-sidebar);
+    @apply flex items-center gap-3 px-3 py-2.5 mx-2 mb-0.5 rounded-[10px] text-[13px] font-medium
+           transition-all duration-150 cursor-pointer select-none;
+  }
+
+  .nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: #ffffff;
+  }
+
+  .nav-item-active {
+    background: var(--brand-blue) !important;
+    color: #ffffff !important;
+  }
+
+  /* ── Page Layout ────────────────────────────────────────────────────── */
+  .page-header { @apply mb-6; }
+
+  .page-title {
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    @apply text-[26px] font-bold tracking-[-0.02em];
+  }
+
+  .page-subtitle {
+    color: var(--text-muted);
+    @apply text-[13px] mt-1;
+  }
+
+  /* ── Section Headers ────────────────────────────────────────────────── */
+  .section-header {
+    color: var(--text-primary);
+    font-family: var(--font-heading);
+    @apply text-[14px] font-semibold mb-4 flex items-center gap-2;
+  }
+
+  /* ── Badge Variants ─────────────────────────────────────────────────── */
+  .badge-success {
+    @apply inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px] font-semibold;
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    font-family: var(--font-mono);
+  }
+
+  .badge-warning {
+    @apply inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px] font-semibold;
+    background: var(--color-warning-bg);
+    color: var(--color-warning);
+    font-family: var(--font-mono);
+  }
+
+  .badge-danger {
+    @apply inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px] font-semibold;
+    background: var(--color-danger-bg);
+    color: var(--color-danger);
+    font-family: var(--font-mono);
+  }
+
+  .badge-info {
+    @apply inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px] font-semibold;
+    background: var(--color-info-bg);
+    color: var(--color-info);
+    font-family: var(--font-mono);
+  }
+
+  .badge-neutral {
+    @apply inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px] font-semibold;
+    background: var(--bg-hover);
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .badge-primary {
+    @apply inline-flex items-center px-2.5 py-1 rounded-[6px] text-[11px] font-semibold;
+    background: var(--brand-blue-soft);
+    color: var(--brand-blue);
+    font-family: var(--font-mono);
+  }
+
+  /* ── Tabs Pill ──────────────────────────────────────────────────────── */
+  .tab-pills {
+    background: var(--bg-card);
+    border: 1px solid var(--border-card);
+    box-shadow: var(--shadow-card);
+    @apply flex gap-1 p-1 rounded-[12px] w-fit;
+  }
+
+  .tab-pill-btn {
+    font-family: var(--font-ui);
+    @apply px-4 py-2 rounded-[9px] text-[13px] font-medium transition-all duration-150;
+    color: var(--text-secondary);
+  }
+
+  .tab-pill-btn-active {
+    background: var(--brand-blue) !important;
+    color: #ffffff !important;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+  }
+}
+
+/* ==========================================================================
+   SHIMMER SKELETON
+   ========================================================================== */
+.shimmer-bg {
+  background: linear-gradient(90deg, var(--bg-hover) 25%, var(--border-card) 50%, var(--bg-hover) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+}
+
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ==========================================================================
+   CHART STYLES
+   ========================================================================== */
+.chart-shadow-glow {
+  filter: drop-shadow(0px 6px 12px rgba(37, 99, 235, 0.12));
+}
+
+/* ==========================================================================
+   LEGACY COMPATIBILITY
+   ========================================================================== */
+.glass { background: var(--bg-card); border: 1px solid var(--border-card); }
+.glass-dark { background: var(--bg-sidebar); border: 1px solid rgba(255,255,255,0.06); }
+.bg-mesh { background: var(--bg-body); }
+
+/* ==========================================================================
+   AERO CONTAINER & TYPOGRAPHY
+   ========================================================================= */
+.aero-container {
+  background-color: var(--canvas-bg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: 0 24px 48px var(--shadow-ambient);
+  border-radius: 20px;
+  padding: 3.5rem;
+  transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
+}
+
+.aero-container h1 {
+  font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif;
+  color: var(--ink-primary);
+  font-size: 3.25rem;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.045em; 
+  margin-bottom: 1.25rem;
+}
+
+.aero-container p {
+  font-family: system-ui, -apple-system, sans-serif;
+  color: var(--ink-secondary);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.65;
+  letter-spacing: -0.005em;
+}
