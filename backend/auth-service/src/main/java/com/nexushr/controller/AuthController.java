@@ -1,8 +1,10 @@
 package com.nexushr.controller;
 
+import com.nexushr.dto.ForgotPasswordRequest;
 import com.nexushr.dto.LoginRequest;
 import com.nexushr.dto.LoginResponse;
 import com.nexushr.dto.RegisterRequest;
+import com.nexushr.dto.ResetPasswordRequest;
 import com.nexushr.service.AuthService;
 import com.nexushr.service.RefreshTokenService;
 import jakarta.validation.Valid;
@@ -40,6 +42,18 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Map<String, String>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Simulated reset token email sent to " + request.getEmail()));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Map<String, String>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        authService.resetPassword(request);
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully. You can now log in."));
     }
 
     /*

@@ -7,8 +7,12 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import com.nexushr.entity.PayrollStatus;
+
 @Repository
 public interface PayrollRepository extends JpaRepository<Payroll, Long> {
+
+    long countByStatus(PayrollStatus status);
 
     List<Payroll> findByEmployeeId(Long employeeId);
 

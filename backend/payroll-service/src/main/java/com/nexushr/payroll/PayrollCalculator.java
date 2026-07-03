@@ -29,10 +29,15 @@ public class PayrollCalculator {
             double netSalary,
             String taxBracketLabel,
             double overtimeHours,
-            double overtimePay
+            double overtimePay,
+            double allowances,
+            double reimbursements
     ) {
         public PayrollResult(double basicSalary, double bonus, double deductions, double taxRate, double taxAmount, double netSalary, String taxBracketLabel) {
-            this(basicSalary, bonus, deductions, taxRate, taxAmount, netSalary, taxBracketLabel, 0.0, 0.0);
+            this(basicSalary, bonus, deductions, taxRate, taxAmount, netSalary, taxBracketLabel, 0.0, 0.0, 0.0, 0.0);
+        }
+        public PayrollResult(double basicSalary, double bonus, double deductions, double taxRate, double taxAmount, double netSalary, String taxBracketLabel, double overtimeHours, double overtimePay) {
+            this(basicSalary, bonus, deductions, taxRate, taxAmount, netSalary, taxBracketLabel, overtimeHours, overtimePay, 0.0, 0.0);
         }
     }
 
@@ -45,24 +50,31 @@ public class PayrollCalculator {
      * @return            Fully computed PayrollResult
      */
     public PayrollResult calculate(double basicSalary, double bonus, double deductions) {
-        return calculate(basicSalary, bonus, deductions, 0.0, 0.0);
+        return calculate(basicSalary, bonus, deductions, 0.0, 0.0, 0.0, 0.0);
     }
 
     /*
      * Computes a full payroll breakdown including overtime metrics.
      */
     public PayrollResult calculate(double basicSalary, double bonus, double deductions, double overtimeHours, double hourlyRate) {
+        return calculate(basicSalary, bonus, deductions, overtimeHours, hourlyRate, 0.0, 0.0);
+    }
+
+    /*
+     * Computes a full payroll breakdown including overtime, allowances, and reimbursements.
+     */
+    public PayrollResult calculate(double basicSalary, double bonus, double deductions, double overtimeHours, double hourlyRate, double allowances, double reimbursements) {
         double taxRate = resolveTaxRate(basicSalary);
         double taxAmount = basicSalary * taxRate;
         double overtimePay = Math.round((overtimeHours * hourlyRate * 1.5) * 100.0) / 100.0;
-        double netSalary = basicSalary + bonus + overtimePay - deductions - taxAmount;
+        double netSalary = basicSalary + bonus + overtimePay + allowances + reimbursements - deductions - taxAmount;
 
         String label = resolveBracketLabel(taxRate);
 
-        log.info("[PAYROLL-CALC] basic={} bonus={} overtimeHours={} overtimePay={} deductions={} tax={}({}) net={}",
-                basicSalary, bonus, overtimeHours, overtimePay, deductions, taxAmount, label, netSalary);
+        log.info("[PAYROLL-CALC] basic={} bonus={} overtimeHours={} overtimePay={} allowances={} reimbursements={} deductions={} tax={}({}) net={}",
+                basicSalary, bonus, overtimeHours, overtimePay, allowances, reimbursements, deductions, taxAmount, label, netSalary);
 
-        return new PayrollResult(basicSalary, bonus, deductions, taxRate, taxAmount, netSalary, label, overtimeHours, overtimePay);
+        return new PayrollResult(basicSalary, bonus, deductions, taxRate, taxAmount, netSalary, label, overtimeHours, overtimePay, allowances, reimbursements);
     }
 
     /*

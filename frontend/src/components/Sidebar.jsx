@@ -4,7 +4,7 @@ import {
   SquaresFour, UsersThree, CalendarDots, ClockCountdown,
   CurrencyDollar, Target, ChartBar, BellSimple,
   User, SignOut, Buildings, Sparkle, MagnifyingGlass,
-  Briefcase, CaretDown, CalendarCheck
+  Briefcase, CaretDown, CalendarCheck, Shield
 } from "@phosphor-icons/react";
 import { useAuth } from "../context/AuthContext";
 import { notificationService } from "../services/notificationService";
@@ -72,7 +72,7 @@ const NavItem = ({ to, icon: Icon, label, badge }) => {
 
 // ── Sidebar ───────────────────────────────────────────────────────────────
 export default function Sidebar() {
-  const { user, logout, isHR } = useAuth();
+  const { user, logout, isHR, isAdmin } = useAuth();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -202,6 +202,14 @@ export default function Sidebar() {
             <NavItem to="/employees"   icon={UsersThree} label="Employees" />
             <NavItem to="/departments" icon={Buildings}  label="Departments" />
             <NavItem to="/recruitment" icon={Briefcase}  label="Recruitment" />
+          </NavGroup>
+        )}
+
+        {/* System Admin — Admin only */}
+        {isAdmin() && (
+          <NavGroup label="System Admin">
+            <NavItem to="/users"      icon={UsersThree} label="User Management" />
+            <NavItem to="/audit-logs" icon={Shield}     label="Audit Log" />
           </NavGroup>
         )}
 

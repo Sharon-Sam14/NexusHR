@@ -1,8 +1,11 @@
 package com.nexushr.entity;
 
 public enum PayrollStatus {
-    PENDING,
+    DRAFT,
+    PENDING_APPROVAL,
+    APPROVED,
     PROCESSED,
     PAID,
-    CANCELLED
+    CANCELLED,
+    PENDING_REOPEN
 }

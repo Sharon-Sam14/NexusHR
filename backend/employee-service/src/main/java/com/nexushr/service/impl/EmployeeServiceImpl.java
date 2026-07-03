@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.nexushr.util.AuditLogger;
 import org.springframework.transaction.annotation.Transactional;
 
 /*
@@ -45,6 +46,7 @@ public class EmployeeServiceImpl implements EmployeeService {
             employee.setStatus(EmployeeStatus.ACTIVE);
         }
         Employee saved = employeeRepository.save(employee);
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "EMPLOYEE_CREATED", saved.getEmployeeName(), "Initial Salary: " + saved.getSalary());
         return toDTO(saved);
     }
 
@@ -52,6 +54,20 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeDTO updateEmployee(Long id, EmployeeDTO dto) {
         Employee existing = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            boolean salaryChanged = dto.getSalary() != null && !existing.getSalary().equals(dto.getSalary());
+            if (salaryChanged) {
+                throw new RuntimeException("HR cannot directly modify employee salaries. Please submit a Salary Approval Request on the Payroll page.");
+            }
+            if (dto.getStatus() != null && dto.getStatus() != existing.getStatus()) {
+                throw new RuntimeException("Only Admin can change employee activation status.");
+            }
+        }
 
         existing.setEmployeeName(dto.getEmployeeName());
         existing.setEmail(dto.getEmail());
@@ -73,15 +89,23 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
 
         Employee saved = employeeRepository.save(existing);
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "EMPLOYEE_UPDATED", saved.getEmployeeName(), "Updated details");
         return toDTO(saved);
     }
 
     @Override
     public void deleteEmployee(Long id) {
-        if (!employeeRepository.existsById(id)) {
-            throw new RuntimeException("Employee not found with id: " + id);
+        Employee existing = employeeRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Employee not found with id: " + id));
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (!isAdmin) {
+            throw new RuntimeException("Only Admin can delete employees.");
         }
         employeeRepository.deleteById(id);
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "EMPLOYEE_DELETED", existing.getEmployeeName(), "Deleted employee profile");
     }
 
     @Override

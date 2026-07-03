@@ -18,9 +18,11 @@ import Profile from "../pages/profile/Profile";
 import Departments from "../pages/departments/Departments";
 import AiInsights from "../pages/insights/AiInsights";
 import Schedule from "../pages/schedule/Schedule";
+import UserManagement from "../pages/users/UserManagement";
+import AuditLogs from "../pages/audit/AuditLogs";
 
 export default function AppRoutes() {
-  const { isHR } = useAuth();
+  const { isHR, isAdmin } = useAuth();
 
   return (
     <Routes>
@@ -36,19 +38,36 @@ export default function AppRoutes() {
         }
       >
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/employees" element={<Employees />} />
+        <Route
+          path="/employees"
+          element={isHR() ? <Employees /> : <Navigate to="/dashboard" replace />}
+        />
         <Route path="/attendance" element={<Attendance />} />
         <Route path="/leave" element={<LeaveManagement />} />
         <Route path="/payroll" element={<Payroll />} />
         <Route path="/performance" element={<Performance />} />
-        <Route path="/recruitment" element={<Recruitment />} />
+        <Route
+          path="/recruitment"
+          element={isHR() ? <Recruitment /> : <Navigate to="/dashboard" replace />}
+        />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/departments" element={<Departments />} />
+        <Route
+          path="/departments"
+          element={isHR() ? <Departments /> : <Navigate to="/dashboard" replace />}
+        />
         <Route path="/schedule" element={<Schedule />} />
         <Route
           path="/insights"
           element={isHR() ? <AiInsights /> : <Navigate to="/dashboard" replace />}
+        />
+        <Route
+          path="/users"
+          element={isAdmin() ? <UserManagement /> : <Navigate to="/dashboard" replace />}
+        />
+        <Route
+          path="/audit-logs"
+          element={isAdmin() ? <AuditLogs /> : <Navigate to="/dashboard" replace />}
         />
       </Route>
 

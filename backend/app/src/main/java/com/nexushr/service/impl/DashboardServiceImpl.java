@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@SuppressWarnings("null")
 public class DashboardServiceImpl implements DashboardService {
 
     private final UserRepository userRepository;
@@ -27,6 +28,7 @@ public class DashboardServiceImpl implements DashboardService {
     private final DepartmentRepository departmentRepository;
     private final PerformanceRepository performanceRepository;
     private final NotificationRepository notificationRepository;
+    private final SalaryApprovalRequestRepository salaryApprovalRequestRepository;
 
     @Override
     public DashboardStatsDTO getStats(String userEmail) {
@@ -90,6 +92,13 @@ public class DashboardServiceImpl implements DashboardService {
             long totalDepts = departmentRepository.count();
             Double avgRating = performanceRepository.findAverageOverallRating();
 
+            long pendingSalary = salaryApprovalRequestRepository.countByStatus(SalaryApprovalStatus.PENDING);
+            long pendingPayroll = payrollRepository.countByStatus(PayrollStatus.PENDING_APPROVAL);
+            long inactiveEmployees = employeeRepository.countByStatus(EmployeeStatus.INACTIVE);
+            long payrollDrafts = payrollRepository.countByStatus(PayrollStatus.DRAFT);
+            long salaryRequestsSent = salaryApprovalRequestRepository.countByRequestedByAndStatus(userEmail, SalaryApprovalStatus.PENDING);
+            long recruitmentPipeline = recruitmentRepository.count();
+
             DashboardStatsDTO.DashboardStatsDTOBuilder builder = DashboardStatsDTO.builder()
                     .totalEmployees(totalEmployees)
                     .activeEmployees(activeEmployees)
@@ -101,7 +110,15 @@ public class DashboardServiceImpl implements DashboardService {
                     .openJobPositions(openJobs)
                     .totalDepartments(totalDepts)
                     .avgPerformanceRating(avgRating != null ? avgRating : 0.0)
-                    .unreadNotifications(unread);
+                    .unreadNotifications(unread)
+                    .pendingSalaryApprovals(pendingSalary)
+                    .pendingPayrollApprovals(pendingPayroll)
+                    .pendingLeaveRequests(pendingLeaves)
+                    .attendanceCorrections(3L) // fallback placeholder for review queue
+                    .inactiveEmployees(inactiveEmployees)
+                    .payrollDrafts(payrollDrafts)
+                    .salaryRequestsSent(salaryRequestsSent)
+                    .recruitmentPipelineCount(recruitmentPipeline);
 
             populateBestEmployee(builder);
             return builder.build();

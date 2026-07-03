@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.nexushr.util.AuditLogger;
 import org.springframework.transaction.annotation.Transactional;
 
 /*
@@ -63,6 +64,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         sendNotification("hr@nexushr.com", title, message, "LEAVE");
         sendNotification("admin@nexushr.com", title, message, "LEAVE");
 
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "LEAVE_REQUESTED", employee.getEmployeeName(), "Type: " + request.getLeaveType() + ", Days: " + totalDays);
+
         return saved;
     }
 
@@ -70,6 +73,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public LeaveRequestDTO approveLeave(Long id, String approvedBy, String remarks) {
         LeaveRequest request = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
+
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (request.getStatus() != LeaveStatus.PENDING && !isAdmin) {
+            throw new RuntimeException("Only Admin can override existing leave decisions.");
+        }
 
         if (request.getStatus() == LeaveStatus.APPROVED) {
             return toDTO(request);
@@ -99,6 +110,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
         }
         sendNotification(employee.getEmail(), title, message, "LEAVE");
 
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "LEAVE_APPROVED", employee.getEmployeeName(), "Approved by: " + approvedBy + ", Remarks: " + remarks);
+
         return saved;
     }
 
@@ -106,6 +119,14 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     public LeaveRequestDTO rejectLeave(Long id, String approvedBy, String remarks) {
         LeaveRequest request = leaveRequestRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Leave request not found"));
+
+        org.springframework.security.core.Authentication auth = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        if (request.getStatus() != LeaveStatus.PENDING && !isAdmin) {
+            throw new RuntimeException("Only Admin can override existing leave decisions.");
+        }
 
         if (request.getStatus() == LeaveStatus.APPROVED) {
             Employee employee = request.getEmployee();
@@ -126,6 +147,8 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
             message += " Remarks: " + remarks;
         }
         sendNotification(request.getEmployee().getEmail(), title, message, "LEAVE");
+
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "LEAVE_REJECTED", request.getEmployee().getEmployeeName(), "Rejected by: " + approvedBy + ", Remarks: " + remarks);
 
         return saved;
     }

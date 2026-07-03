@@ -120,6 +120,14 @@ public class PayslipGenerator {
                 addPayRow(payTable, "Overtime Payout", overtimeDesc, formatAmount(payroll.getOvertimePay()), rowFont, BaseColor.WHITE);
             }
 
+            if (payroll.getAllowances() != null && payroll.getAllowances() > 0) {
+                addPayRow(payTable, "Allowances", "Standard allowances & benefits", formatAmount(payroll.getAllowances()), rowFont, ROW_ALT);
+            }
+
+            if (payroll.getReimbursements() != null && payroll.getReimbursements() > 0) {
+                addPayRow(payTable, "Reimbursements", "Expense claims & reimbursements", formatAmount(payroll.getReimbursements()), rowFont, BaseColor.WHITE);
+            }
+
             // Deductions
             addPayRow(payTable, "Deductions", "Insurance, PF, etc.", "- " + formatAmount(payroll.getDeductions()), rowFont, BaseColor.WHITE);
 

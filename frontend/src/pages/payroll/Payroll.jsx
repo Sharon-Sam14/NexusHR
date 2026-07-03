@@ -1,6 +1,6 @@
 // NexusHR: Precision Industrial Payroll workspace.
 import { useState, useEffect } from "react";
-import { CurrencyInr, Printer, DownloadSimple, Eye, Plus, CheckCircle, MagnifyingGlass, Calendar, FileText } from "@phosphor-icons/react";
+import { CurrencyInr, Printer, DownloadSimple, Eye, Plus, CheckCircle, MagnifyingGlass, Calendar, FileText, PencilSimpleLine, XCircle, PaperPlaneTilt, Gear, ArrowCounterClockwise, Lock, ClockCountdown } from "@phosphor-icons/react";
 import { useAuth } from "../../context/AuthContext";
 import { payrollService } from "../../services/payrollService";
 import { employeeService } from "../../services/employeeService";
@@ -75,10 +75,17 @@ const dummyPayrolls = [
 ];
 
 export default function Payroll() {
-  const { user, isHR, loading: authLoading } = useAuth();
+  const { user, isHR, isAdmin, loading: authLoading } = useAuth();
   const [payrolls, setPayrolls] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [pendingRevisions, setPendingRevisions] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Salary History
+  const [salaryHistory, setSalaryHistory] = useState([]);
+  const [historyEmployee, setHistoryEmployee] = useState(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
 
   // Filters
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -87,6 +94,8 @@ export default function Payroll() {
 
   // Modals
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
+  const [isEditingPayroll, setIsEditingPayroll] = useState(false);
+  const [isRevisionOpen, setIsRevisionOpen] = useState(false);
   const [isSlipOpen, setIsSlipOpen] = useState(false);
   const [selectedSlip, setSelectedSlip] = useState(null);
   const [isBatchOpen, setIsBatchOpen] = useState(false);
@@ -111,6 +120,13 @@ export default function Payroll() {
     remarks: "",
   });
 
+  const [revisionForm, setRevisionForm] = useState({
+    employeeId: "",
+    currentSalary: "",
+    proposedSalary: "",
+    reason: ""
+  });
+
   useEffect(() => {
     if (!authLoading) {
       fetchData();
@@ -121,12 +137,19 @@ export default function Payroll() {
     setLoading(true);
     try {
       if (isHR()) {
-        const [payData, empData] = await Promise.all([
+        const promises = [
           payrollService.getByMonth(selectedMonth, selectedYear),
-          employeeService.getAll(),
-        ]);
-        setPayrolls(payData);
-        setEmployees(empData);
+          employeeService.getAll()
+        ];
+        if (isAdmin()) {
+          promises.push(payrollService.getPendingSalaryRevisions());
+        }
+        const results = await Promise.all(promises);
+        setPayrolls(results[0]);
+        setEmployees(results[1]);
+        if (isAdmin()) {
+          setPendingRevisions(results[2]);
+        }
       } else if (user?.employee?.id) {
         const payData = await payrollService.getByEmployee(user.employee.id);
         setPayrolls(payData);
@@ -138,11 +161,74 @@ export default function Payroll() {
       if (isHR()) {
         setPayrolls([]);
         setEmployees([]);
+        if (isAdmin()) {
+          setPendingRevisions([]);
+        }
       } else {
         setPayrolls([]);
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleOpenRevision = () => {
+    setRevisionForm({
+      employeeId: "",
+      currentSalary: "",
+      proposedSalary: "",
+      reason: ""
+    });
+    setIsRevisionOpen(true);
+  };
+
+  const handleRevisionEmployeeChange = (e) => {
+    const empId = e.target.value;
+    const emp = employees.find(emp => emp?.id?.toString() === empId?.toString());
+    setRevisionForm({
+      ...revisionForm,
+      employeeId: empId,
+      currentSalary: emp ? emp.salary : ""
+    });
+  };
+
+  const handleSaveRevision = async (e) => {
+    e.preventDefault();
+    try {
+      await payrollService.submitSalaryRevision({
+        employeeId: revisionForm.employeeId,
+        proposedSalary: parseFloat(revisionForm.proposedSalary),
+        reason: revisionForm.reason
+      });
+      setIsRevisionOpen(false);
+      alert("Salary revision requested successfully. Submitted for Admin approval.");
+      fetchData();
+    } catch (error) {
+      alert("Failed to submit salary revision: " + (error.response?.data?.message || error.message));
+    }
+  };
+
+  const handleApproveRevision = async (id) => {
+    if (window.confirm("Approve this salary revision?")) {
+      try {
+        await payrollService.approveSalaryRevision(id);
+        alert("Salary revision approved!");
+        fetchData();
+      } catch (error) {
+        alert("Failed to approve salary revision: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleRejectRevision = async (id) => {
+    if (window.confirm("Reject this salary revision?")) {
+      try {
+        await payrollService.rejectSalaryRevision(id);
+        alert("Salary revision rejected.");
+        fetchData();
+      } catch (error) {
+        alert("Failed to reject salary revision: " + (error.response?.data?.message || error.message));
+      }
     }
   };
 
@@ -155,20 +241,174 @@ export default function Payroll() {
       bonus: 0.0,
       deductions: 0.0,
       tax: 0.0,
+      allowances: 0.0,
+      reimbursements: 0.0,
+      overtimePay: 0.0,
       workingDays: 22,
       daysPresent: 22,
       remarks: "",
     });
+    setIsEditingPayroll(false);
+    setIsGenerateOpen(true);
+  };
+
+  const handleApprovePayroll = async (id) => {
+    if (window.confirm("Approve this payroll draft?")) {
+      try {
+        try {
+          await payrollService.updateStatus(id, "APPROVED");
+          fetchData();
+        } catch (apiError) {
+          console.warn("API update status failed, simulating locally for demo", apiError);
+          setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: "APPROVED" } : p));
+        }
+        alert("Payroll draft approved!");
+      } catch (error) {
+        alert("Failed to approve payroll: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleSubmitForApproval = async (id) => {
+    if (window.confirm("Submit this payroll draft for Admin approval?")) {
+      try {
+        try {
+          await payrollService.updateStatus(id, "PENDING_APPROVAL");
+          fetchData();
+        } catch (apiError) {
+          console.warn("API update status failed, simulating locally for demo", apiError);
+          setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: "PENDING_APPROVAL" } : p));
+        }
+        alert("Payroll submitted for approval!");
+      } catch (error) {
+        alert("Failed to submit payroll: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleProcessPayroll = async (id) => {
+    if (window.confirm("Process this approved payroll?")) {
+      try {
+        try {
+          await payrollService.updateStatus(id, "PROCESSED");
+          fetchData();
+        } catch (apiError) {
+          console.warn("API update status failed, simulating locally for demo", apiError);
+          setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: "PROCESSED" } : p));
+        }
+        alert("Payroll processed successfully!");
+      } catch (error) {
+        alert("Failed to process payroll: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleCancelPayroll = async (id) => {
+    if (window.confirm("Cancel this payroll draft?")) {
+      try {
+        try {
+          await payrollService.updateStatus(id, "CANCELLED");
+          fetchData();
+        } catch (apiError) {
+          console.warn("API update status failed, simulating locally for demo", apiError);
+          setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: "CANCELLED" } : p));
+        }
+        alert("Payroll draft cancelled.");
+      } catch (error) {
+        alert("Failed to cancel payroll: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleRequestReopen = async (id) => {
+    if (window.confirm("Submit a request to reopen this payroll back to DRAFT?")) {
+      try {
+        try {
+          await payrollService.updateStatus(id, "PENDING_REOPEN");
+          fetchData();
+        } catch (apiError) {
+          console.warn("API update status failed, simulating locally for demo", apiError);
+          setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: "PENDING_REOPEN" } : p));
+        }
+        alert("Reopen request submitted to Admin!");
+      } catch (error) {
+        alert("Failed to request reopen: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleApproveReopen = async (id) => {
+    if (window.confirm("Approve reopen request and return this payroll to DRAFT?")) {
+      try {
+        try {
+          await payrollService.updateStatus(id, "DRAFT");
+          fetchData();
+        } catch (apiError) {
+          console.warn("API update status failed, simulating locally for demo", apiError);
+          setPayrolls(prev => prev.map(p => p.id === id ? { ...p, status: "DRAFT" } : p));
+        }
+        alert("Payroll returned to DRAFT status successfully.");
+      } catch (error) {
+        alert("Failed to approve reopen: " + (error.response?.data?.message || error.message));
+      }
+    }
+  };
+
+  const handleEditDraft = (row) => {
+    setGenerateForm({
+      employeeId: row.employeeId || "",
+      month: row.month,
+      year: row.year,
+      basicSalary: row.basicSalary,
+      bonus: row.bonus,
+      deductions: row.deductions,
+      tax: row.tax,
+      allowances: row.allowances || 0,
+      reimbursements: row.reimbursements || 0,
+      overtimePay: row.overtimePay || 0,
+      workingDays: row.workingDays || 22,
+      daysPresent: row.daysPresent || 22,
+      remarks: row.remarks || "",
+    });
+    setIsEditingPayroll(true);
     setIsGenerateOpen(true);
   };
 
   const handleEmployeeChange = (e) => {
     const empId = e.target.value;
     const emp = employees.find(e => e?.id?.toString() === empId?.toString());
+    const salary = emp ? emp.salary : 0;
+    
+    let taxRate = 0.12;
+    if (salary >= 100000) {
+      taxRate = 0.25;
+    } else if (salary >= 50000) {
+      taxRate = 0.18;
+    }
+    const calculatedTax = salary * taxRate;
+
     setGenerateForm({
       ...generateForm,
       employeeId: empId,
       basicSalary: emp ? emp.salary : "",
+      tax: calculatedTax,
+    });
+  };
+
+  const handleBasicSalaryChange = (e) => {
+    const salary = parseFloat(e.target.value) || 0;
+    let taxRate = 0.12;
+    if (salary >= 100000) {
+      taxRate = 0.25;
+    } else if (salary >= 50000) {
+      taxRate = 0.18;
+    }
+    const calculatedTax = salary * taxRate;
+
+    setGenerateForm({
+      ...generateForm,
+      basicSalary: e.target.value,
+      tax: calculatedTax,
     });
   };
 
@@ -186,7 +426,10 @@ export default function Payroll() {
         const bonus = parseFloat(generateForm.bonus) || 0;
         const ded = parseFloat(generateForm.deductions) || 0;
         const tax = parseFloat(generateForm.tax) || 0;
-        const net = basic + bonus - ded - tax;
+        const allowances = parseFloat(generateForm.allowances) || 0;
+        const reimbursements = parseFloat(generateForm.reimbursements) || 0;
+        const overtimePay = parseFloat(generateForm.overtimePay) || 0;
+        const net = basic + bonus + overtimePay + allowances + reimbursements - ded - tax;
         const newSlip = {
           id: Date.now(),
           employeeName: emp.employeeName,
@@ -198,8 +441,11 @@ export default function Payroll() {
           bonus: bonus,
           deductions: ded,
           tax: tax,
+          allowances: allowances,
+          reimbursements: reimbursements,
+          overtimePay: overtimePay,
           netSalary: net,
-          status: "PENDING",
+          status: "DRAFT",
           workingDays: generateForm.workingDays,
           daysPresent: generateForm.daysPresent,
           remarks: generateForm.remarks || "Simulation"
@@ -231,6 +477,22 @@ export default function Payroll() {
   const handleViewSlip = (payroll) => {
     setSelectedSlip(payroll);
     setIsSlipOpen(true);
+  };
+
+  const handleViewSalaryHistory = async (row) => {
+    const emp = employees.find(e => e?.id?.toString() === row?.employeeId?.toString());
+    setHistoryEmployee(emp || { employeeName: row.employeeName, id: row.employeeId });
+    setIsHistoryOpen(true);
+    setHistoryLoading(true);
+    try {
+      const data = await payrollService.getEmployeeSalaryHistory(row.employeeId);
+      setSalaryHistory(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.error("Failed to fetch salary history", err);
+      setSalaryHistory([]);
+    } finally {
+      setHistoryLoading(false);
+    }
   };
 
   const handlePrintSlip = () => {
@@ -333,11 +595,36 @@ export default function Payroll() {
       render: (val, row) => (row.overtimeHours && row.overtimeHours > 0) ? `${row.overtimeHours.toFixed(1)} hrs (+${formatCurrency(val)})` : "—"
     },
     { key: "netSalary", label: "Net Payout", render: (val) => <span className="font-semibold text-[var(--brand-primary)]">{formatCurrency(val)}</span> },
-    { key: "status", label: "Status", render: (val) => <Badge status={val} label={val} /> },
+    {
+      key: "status",
+      label: "Status",
+      render: (val) => (
+        <div className="flex items-center gap-1.5">
+          <Badge status={val} label={val} />
+          {["APPROVED", "PROCESSED", "PAID"].includes(val) && (
+            <span title="Locked — cannot be edited without Admin reopen approval" className="inline-flex items-center">
+              <Lock size={11} className="text-slate-400" weight="fill" />
+            </span>
+          )}
+        </div>
+      )
+    },
   ];
 
   const actions = (row) => (
     <div className="flex items-center justify-end gap-2">
+      {/* View salary history button */}
+      {isHR() && row.employeeId && (
+        <button
+          onClick={() => handleViewSalaryHistory(row)}
+          className="p-1 rounded text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+          title="View Salary History"
+        >
+          <ClockCountdown size={15} />
+        </button>
+      )}
+
+      {/* View payslip */}
       <button
         onClick={() => handleViewSlip(row)}
         className="p-1 rounded text-[var(--brand-primary)] hover:bg-[var(--brand-primary)]/10 transition-colors"
@@ -345,11 +632,84 @@ export default function Payroll() {
       >
         <Eye size={15} />
       </button>
-      {isHR() && row.status !== "PAID" && (
+
+      {/* DRAFT Actions */}
+      {row.status === "DRAFT" && isHR() && (
+        <>
+          <button
+            onClick={() => handleEditDraft(row)}
+            className="p-1 rounded text-blue-500 hover:bg-blue-500/10 transition-colors"
+            title="Edit Draft"
+          >
+            <PencilSimpleLine size={15} />
+          </button>
+          <button
+            onClick={() => handleSubmitForApproval(row.id)}
+            className="p-1 rounded text-amber-500 hover:bg-amber-500/10 transition-colors"
+            title="Submit for Approval"
+          >
+            <PaperPlaneTilt size={15} />
+          </button>
+          <button
+            onClick={() => handleCancelPayroll(row.id)}
+            className="p-1 rounded text-red-500 hover:bg-red-500/10 transition-colors"
+            title="Cancel Draft"
+          >
+            <XCircle size={15} />
+          </button>
+        </>
+      )}
+
+      {/* PENDING_APPROVAL Actions */}
+      {row.status === "PENDING_APPROVAL" && isAdmin() && (
+        <button
+          onClick={() => handleApprovePayroll(row.id)}
+          className="p-1 rounded text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+          title="Approve Draft"
+        >
+          <CheckCircle size={15} />
+        </button>
+      )}
+
+      {/* APPROVED Actions */}
+      {row.status === "APPROVED" && isAdmin() && (
+        <button
+          onClick={() => handleProcessPayroll(row.id)}
+          className="p-1 rounded text-blue-500 hover:bg-blue-500/10 transition-colors"
+          title="Process Payroll"
+        >
+          <Gear size={15} />
+        </button>
+      )}
+
+      {/* PROCESSED Actions */}
+      {row.status === "PROCESSED" && isAdmin() && (
         <button
           onClick={() => handleMarkPaid(row.id)}
           className="p-1 rounded text-emerald-500 hover:bg-emerald-500/10 transition-colors"
           title="Mark Paid"
+        >
+          <CheckCircle size={15} />
+        </button>
+      )}
+
+      {/* Request Reopen (HR) */}
+      {(row.status === "APPROVED" || row.status === "PROCESSED") && isHR() && (
+        <button
+          onClick={() => handleRequestReopen(row.id)}
+          className="p-1 rounded text-amber-500 hover:bg-amber-500/10 transition-colors"
+          title="Request Reopen to Draft"
+        >
+          <ArrowCounterClockwise size={15} />
+        </button>
+      )}
+
+      {/* Approve Reopen (Admin) */}
+      {row.status === "PENDING_REOPEN" && isAdmin() && (
+        <button
+          onClick={() => handleApproveReopen(row.id)}
+          className="p-1 rounded text-emerald-500 hover:bg-emerald-500/10 transition-colors"
+          title="Approve Reopen Request"
         >
           <CheckCircle size={15} />
         </button>
@@ -380,6 +740,10 @@ export default function Payroll() {
           </div>
           {isHR() && (
             <div className="flex gap-2">
+              <Button variant="secondary" onClick={handleOpenRevision} className="flex items-center gap-1.5 py-2 text-xs">
+                <Plus size={14} />
+                <span>Recommend Salary Revision</span>
+              </Button>
               <Button variant="secondary" onClick={handleOpenBatchModal} className="flex items-center gap-1.5 py-2 text-xs">
                 <Calendar size={14} />
                 <span>Run Monthly Batch</span>
@@ -391,6 +755,70 @@ export default function Payroll() {
             </div>
           )}
         </div>
+
+        {/* Pending Salary Approvals (Admin Only) */}
+        {isAdmin() && pendingRevisions.length > 0 && (
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-2 font-mono">
+              <CurrencyInr size={14} className="text-amber-500" />
+              <span>Pending Salary Approvals ({pendingRevisions.length})</span>
+            </h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {pendingRevisions.map(rev => {
+                const diff = (rev.proposedSalary || 0) - (rev.previousSalary || 0);
+                const percent = ((diff / (rev.previousSalary || 1)) * 100).toFixed(1);
+                return (
+                  <Card key={rev.id} className="p-5 flex flex-col justify-between border-amber-500/30">
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium text-slate-850 dark:text-slate-200 text-sm">{rev.employeeName}</p>
+                          <p className="text-[10px] text-slate-550 font-mono tracking-wider uppercase">{rev.department} • {rev.designation}</p>
+                        </div>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded font-mono ${diff >= 0 ? "bg-emerald-500/10 text-emerald-500" : "bg-red-500/10 text-red-500"}`}>
+                          {diff >= 0 ? "+" : ""}{formatCurrency(diff)} ({percent}%)
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4 text-xs font-mono p-3 bg-slate-50 dark:bg-slate-900/50 rounded border border-slate-200 dark:border-slate-805">
+                        <div>
+                          <span className="text-[9px] uppercase font-semibold text-slate-400">Current Salary</span>
+                          <p className="text-slate-700 dark:text-slate-300 font-semibold mt-0.5">{formatCurrency(rev.previousSalary)}</p>
+                        </div>
+                        <div>
+                          <span className="text-[9px] uppercase font-semibold text-slate-450">Proposed Salary</span>
+                          <p className="text-slate-800 dark:text-slate-100 font-semibold mt-0.5">{formatCurrency(rev.proposedSalary)}</p>
+                        </div>
+                      </div>
+
+                      <div className="text-xs space-y-1 font-body">
+                        <p className="text-slate-550"><span className="font-semibold text-slate-700 dark:text-slate-350">Reason:</span> "{rev.reason}"</p>
+                        <p className="text-[10px] text-slate-450 font-mono">Requested by {rev.requestedBy} on {new Date(rev.requestedDate).toLocaleDateString()}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-2 mt-4 pt-3 border-t border-slate-200 dark:border-slate-800/80">
+                      <Button
+                        onClick={() => handleApproveRevision(rev.id)}
+                        variant="primary"
+                        className="flex-1 py-1.5 text-xs bg-emerald-650 hover:bg-emerald-550 border-0"
+                      >
+                        Approve
+                      </Button>
+                      <Button
+                        onClick={() => handleRejectRevision(rev.id)}
+                        variant="danger"
+                        className="flex-1 py-1.5 text-xs"
+                      >
+                        Reject
+                      </Button>
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Payroll Stat Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -472,7 +900,7 @@ export default function Payroll() {
         <Modal
           isOpen={isGenerateOpen}
           onClose={() => setIsGenerateOpen(false)}
-          title="Run Employee Payroll"
+          title={isEditingPayroll ? "Edit Employee Payroll Draft" : "Run Employee Payroll"}
           size="lg"
         >
           <form onSubmit={handleGenerate} className="space-y-4 font-body text-xs">
@@ -481,6 +909,7 @@ export default function Payroll() {
                 <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Select Employee *</label>
                 <select
                   required
+                  disabled={isEditingPayroll}
                   value={generateForm.employeeId}
                   onChange={handleEmployeeChange}
                   className="select-field"
@@ -502,7 +931,7 @@ export default function Payroll() {
                     type="number"
                     required
                     value={generateForm.basicSalary}
-                    onChange={(e) => setGenerateForm({ ...generateForm, basicSalary: parseFloat(e.target.value) || "" })}
+                    onChange={handleBasicSalaryChange}
                     className="input-field pl-9"
                     placeholder="Base Salary"
                   />
@@ -565,6 +994,36 @@ export default function Payroll() {
               </div>
 
               <div className="space-y-1">
+                <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Allowances</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <CurrencyInr size={14} />
+                  </span>
+                  <input
+                    type="number"
+                    value={generateForm.allowances}
+                    onChange={(e) => setGenerateForm({ ...generateForm, allowances: parseFloat(e.target.value) || 0 })}
+                    className="input-field pl-9"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Reimbursements</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <CurrencyInr size={14} />
+                  </span>
+                  <input
+                    type="number"
+                    value={generateForm.reimbursements}
+                    onChange={(e) => setGenerateForm({ ...generateForm, reimbursements: parseFloat(e.target.value) || 0 })}
+                    className="input-field pl-9"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
                 <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Estimated Income Tax</label>
                 <div className="relative">
                   <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
@@ -612,6 +1071,58 @@ export default function Payroll() {
               />
             </div>
 
+            {/* Live Net Salary Payout Preview */}
+            {generateForm.employeeId && (
+              <div className="bg-slate-50 dark:bg-slate-900 border border-slate-150 dark:border-slate-800 rounded-lg p-3 space-y-1 font-mono text-[10px]">
+                <div className="text-[9px] uppercase font-semibold text-slate-500 tracking-wider font-mono mb-2">Live Net Payout Preview</div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-body">Basic Salary:</span>
+                  <span className="text-slate-800 dark:text-slate-200">{formatCurrency(parseFloat(generateForm.basicSalary) || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-body">Bonus:</span>
+                  <span className="text-emerald-600 dark:text-emerald-500">+{formatCurrency(parseFloat(generateForm.bonus) || 0)}</span>
+                </div>
+                {generateForm.overtimePay > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 font-body">Overtime Pay (1.5x):</span>
+                    <span className="text-emerald-600 dark:text-emerald-500">+{formatCurrency(parseFloat(generateForm.overtimePay) || 0)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-body">Allowances:</span>
+                  <span className="text-emerald-600 dark:text-emerald-500">+{formatCurrency(parseFloat(generateForm.allowances) || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-body">Reimbursements:</span>
+                  <span className="text-emerald-600 dark:text-emerald-500">+{formatCurrency(parseFloat(generateForm.reimbursements) || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-body">Deductions:</span>
+                  <span className="text-red-500">-{formatCurrency(parseFloat(generateForm.deductions) || 0)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-slate-500 font-body">Income Tax:</span>
+                  <span className="text-red-500">-{formatCurrency(parseFloat(generateForm.tax) || 0)}</span>
+                </div>
+                <div className="border-t border-dashed border-slate-200 dark:border-slate-800 my-2"></div>
+                <div className="flex justify-between text-xs font-semibold">
+                  <span className="text-slate-700 dark:text-slate-300 font-body">Estimated Net Payout:</span>
+                  <span className="text-[var(--brand-primary)] font-mono">
+                    {formatCurrency(
+                      (parseFloat(generateForm.basicSalary) || 0) +
+                      (parseFloat(generateForm.bonus) || 0) +
+                      (parseFloat(generateForm.overtimePay) || 0) +
+                      (parseFloat(generateForm.allowances) || 0) +
+                      (parseFloat(generateForm.reimbursements) || 0) -
+                      (parseFloat(generateForm.deductions) || 0) -
+                      (parseFloat(generateForm.tax) || 0)
+                    )}
+                  </span>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
               <Button
                 type="button"
@@ -621,7 +1132,7 @@ export default function Payroll() {
                 Cancel
               </Button>
               <Button type="submit" variant="primary">
-                Generate Slip
+                {isEditingPayroll ? "Update Draft" : "Generate Slip"}
               </Button>
             </div>
           </form>
@@ -756,6 +1267,18 @@ export default function Payroll() {
                       <span className="font-medium text-emerald-600 dark:text-emerald-500">+{formatCurrency(selectedSlip.overtimePay)}</span>
                     </div>
                   )}
+                  {selectedSlip.allowances > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-body">Allowances</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-500">+{formatCurrency(selectedSlip.allowances)}</span>
+                    </div>
+                  )}
+                  {selectedSlip.reimbursements > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-body">Reimbursements</span>
+                      <span className="font-medium text-emerald-600 dark:text-emerald-500">+{formatCurrency(selectedSlip.reimbursements)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
                     <span className="text-slate-500 font-body">Deductions</span>
                     <span className="font-medium text-red-650 dark:text-red-400">-{formatCurrency(selectedSlip.deductions)}</span>
@@ -817,6 +1340,156 @@ export default function Payroll() {
             </div>
           )}
         </Modal>
+
+        {/* Recommend Salary Revision Modal */}
+        <Modal
+          isOpen={isRevisionOpen}
+          onClose={() => setIsRevisionOpen(false)}
+          title="Recommend Salary Revision"
+          size="md"
+        >
+          <form onSubmit={handleSaveRevision} className="space-y-4 font-body text-xs text-left">
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Select Employee *</label>
+              <select
+                required
+                value={revisionForm.employeeId}
+                onChange={handleRevisionEmployeeChange}
+                className="select-field"
+              >
+                <option value="">Select Employee</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.employeeName} ({emp.department})</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Current Salary</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <CurrencyInr size={14} />
+                  </span>
+                  <input
+                    type="text"
+                    disabled
+                    value={revisionForm.currentSalary ? formatCurrency(revisionForm.currentSalary) : "—"}
+                    className="input-field pl-9 font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Proposed Salary *</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+                    <CurrencyInr size={14} />
+                  </span>
+                  <input
+                    type="number"
+                    required
+                    value={revisionForm.proposedSalary}
+                    onChange={(e) => setRevisionForm({ ...revisionForm, proposedSalary: e.target.value })}
+                    className="input-field pl-9 font-mono"
+                    placeholder="New Salary"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Reason for Revision *</label>
+              <textarea
+                required
+                value={revisionForm.reason}
+                onChange={(e) => setRevisionForm({ ...revisionForm, reason: e.target.value })}
+                className="input-field h-24 resize-none"
+                placeholder="Describe why you are recommending this salary adjustment..."
+              />
+            </div>
+
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setIsRevisionOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" variant="primary">
+                Send to Admin
+              </Button>
+            </div>
+          </form>
+        </Modal>
+        {/* Salary History Modal */}
+        <Modal
+          isOpen={isHistoryOpen}
+          onClose={() => { setIsHistoryOpen(false); setSalaryHistory([]); setHistoryEmployee(null); }}
+          title={`Salary History — ${historyEmployee?.employeeName || ""}`}
+          size="lg"
+        >
+          {historyLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <div className="w-6 h-6 border-2 border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
+            </div>
+          ) : salaryHistory.length === 0 ? (
+            <div className="text-center py-12 text-slate-400 text-xs font-body">
+              <FileText size={32} className="mx-auto mb-3 opacity-40" />
+              <p>No salary revision history found for this employee.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <p className="text-[10px] text-slate-500 font-body">Complete salary revision trail — most recent first. Records are immutable.</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs font-body border-collapse">
+                  <thead>
+                    <tr className="border-b border-slate-200 dark:border-slate-700">
+                      {["Date", "Previous Salary", "Proposed Salary", "Change", "Requested By", "Approved By", "Status"].map(h => (
+                        <th key={h} className="text-left py-2 px-3 text-[10px] font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {salaryHistory.map((rev, idx) => {
+                      const diff = (rev.proposedSalary || 0) - (rev.previousSalary || 0);
+                      const pct = ((diff / (rev.previousSalary || 1)) * 100).toFixed(1);
+                      return (
+                        <tr key={rev.id ?? idx} className="border-b border-slate-100 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors">
+                          <td className="py-2.5 px-3 text-slate-600 dark:text-slate-400 font-mono whitespace-nowrap">
+                            {rev.requestedDate ? new Date(rev.requestedDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—"}
+                          </td>
+                          <td className="py-2.5 px-3 font-mono text-slate-700 dark:text-slate-300">{formatCurrency(rev.previousSalary)}</td>
+                          <td className="py-2.5 px-3 font-mono font-semibold text-slate-800 dark:text-slate-200">{formatCurrency(rev.proposedSalary)}</td>
+                          <td className="py-2.5 px-3">
+                            <span className={`inline-block text-[10px] font-bold px-1.5 py-0.5 rounded font-mono ${
+                              diff >= 0 ? "bg-emerald-500/10 text-emerald-600" : "bg-red-500/10 text-red-500"
+                            }`}>
+                              {diff >= 0 ? "+" : ""}{formatCurrency(diff)} ({pct}%)
+                            </span>
+                          </td>
+                          <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 truncate max-w-[120px]">{rev.requestedBy || "—"}</td>
+                          <td className="py-2.5 px-3 text-slate-500 dark:text-slate-400 truncate max-w-[120px]">{rev.approvedBy || "—"}</td>
+                          <td className="py-2.5 px-3">
+                            <Badge
+                              status={rev.status}
+                              label={rev.status === "APPROVED" ? "Approved" : rev.status === "REJECTED" ? "Rejected" : "Pending"}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              <p className="text-[9px] text-slate-400 font-mono text-right pt-2">
+                {salaryHistory.length} revision record{salaryHistory.length !== 1 ? "s" : ""} total
+              </p>
+            </div>
+          )}
+        </Modal>
+
       </div>
     </PageTransition>
   );

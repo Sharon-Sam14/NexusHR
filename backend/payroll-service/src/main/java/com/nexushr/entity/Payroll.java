@@ -52,6 +52,12 @@ public class Payroll {
     @Builder.Default
     private Double tax = 0.0;
 
+    @Builder.Default
+    private Double allowances = 0.0;
+
+    @Builder.Default
+    private Double reimbursements = 0.0;
+
     /*
      * Net salary (calculated)
      */
@@ -62,7 +68,7 @@ public class Payroll {
      */
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private PayrollStatus status = PayrollStatus.PENDING;
+    private PayrollStatus status = PayrollStatus.DRAFT;
 
     /*
      * Working days in period

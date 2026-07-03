@@ -38,6 +38,7 @@ public class DataSeeder implements CommandLineRunner {
     private final GoalRepository goalRepository;
     private final RefreshTokenRepository refreshTokenRepository;
     private final EmployeeDocumentRepository employeeDocumentRepository;
+    private final SalaryApprovalRequestRepository salaryApprovalRequestRepository;
 
     @Override
     public void run(String... args) {
@@ -45,6 +46,7 @@ public class DataSeeder implements CommandLineRunner {
         try {
             refreshTokenRepository.deleteAll();
             userRepository.deleteAll();
+            salaryApprovalRequestRepository.deleteAll();
             goalRepository.deleteAll();
             performanceRepository.deleteAll();
             payrollRepository.deleteAll();
@@ -287,7 +289,7 @@ public class DataSeeder implements CommandLineRunner {
                     double deductions = 500.0;
                     double tax = basic * 0.15;
                     double net = basic + bonus - deductions - tax;
-                    PayrollStatus payrollStatus = (month == today.getMonthValue()) ? PayrollStatus.PENDING : PayrollStatus.PAID;
+                    PayrollStatus payrollStatus = (month == today.getMonthValue()) ? PayrollStatus.PENDING_APPROVAL : PayrollStatus.PAID;
 
                     payrollRepository.save(Payroll.builder()
                             .employee(emp)

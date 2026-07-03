@@ -48,6 +48,25 @@ export function AuthProvider({ children }) {
     return data;
   };
 
+  const register = async (name, email, password, role) => {
+    const data = await authService.register(name, email, password, role);
+    const { token, refreshToken, ...userInfo } = data;
+
+    if (userInfo.employeeId) {
+      userInfo.employee = { id: userInfo.employeeId };
+    }
+
+    localStorage.setItem("nexushr_token", token);
+    if (refreshToken) {
+      localStorage.setItem("nexushr_refresh_token", refreshToken);
+    }
+    localStorage.setItem("nexushr_user", JSON.stringify(userInfo));
+
+    setToken(token);
+    setUser(userInfo);
+    return data;
+  };
+
   const logout = async () => {
     try {
       await authService.logout();
@@ -79,6 +98,7 @@ export function AuthProvider({ children }) {
         loading,
         isAuthenticated,
         login,
+        register,
         logout,
         hasRole,
         isAdmin,

@@ -6,7 +6,9 @@ C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\n
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\impl\EmployeeServiceImpl.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\impl\RecruitmentServiceImpl.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\EmployeeService.java
+C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\repository\AuditLogRepository.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\RecruitmentService.java
+C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\controller\AuditLogController.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\OnboardingWorkflow.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\OrgChartService.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\repository\EmployeeDocumentRepository.java
@@ -16,6 +18,7 @@ C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\n
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\impl\DepartmentServiceImpl.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\controller\DepartmentController.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\repository\DepartmentRepository.java
+C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\entity\AuditLog.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\entity\Department.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\repository\EmployeeRepository.java
 C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\controller\EmployeeController.java

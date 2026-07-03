@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import {
   UsersThree, Clock, Calendar, CurrencyInr, Star, Briefcase,
   TrendUp, Pulse, Plus, FileText, Sparkle, ArrowUpRight, CaretDown, EnvelopeSimple, Phone,
-  User, Trash, X
+  User, Trash, X, Shield, Warning
 } from "@phosphor-icons/react";
 import { useAuth } from "../../context/AuthContext";
 import { dashboardService } from "../../services/dashboardService";
@@ -45,7 +45,7 @@ const DEFAULT_SCHEDULE = [
 ];
 
 export default function Dashboard() {
-  const { user, isHR } = useAuth();
+  const { user, isHR, isAdmin } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -265,6 +265,137 @@ export default function Dashboard() {
             </>
           )}
         </div>
+
+        {/* ── Admin Approval Queue ─────────────────────────────────────────── */}
+        {isHR() && isAdmin() && (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-2">
+                <Warning size={12} className="text-amber-500" weight="fill" />
+                Pending Admin Actions
+              </h2>
+              <span className="text-[9px] font-semibold font-mono text-slate-400 uppercase tracking-wider">Requires your review</span>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              {/* Pending Salary Approvals */}
+              <Link to="/payroll" className="group">
+                <div className={`relative overflow-hidden rounded-2xl p-5 text-left border transition-all duration-150 hover:shadow-lg ${
+                  (stats?.pendingSalaryApprovals || 0) > 0
+                    ? "bg-amber-500 border-amber-400 text-white shadow-amber-500/20 shadow-md"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60"
+                }`}>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 blur-2xl rounded-full pointer-events-none" />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider font-mono block ${
+                    (stats?.pendingSalaryApprovals || 0) > 0 ? "text-amber-100" : "text-slate-500 dark:text-slate-400"
+                  }`}>Salary Approvals</span>
+                  <p className={`text-3xl font-normal font-mono mt-2 ${
+                    (stats?.pendingSalaryApprovals || 0) > 0 ? "text-white" : "text-amber-500"
+                  }`}>{stats?.pendingSalaryApprovals || 0}</p>
+                  <p className={`text-[10px] mt-1 font-body ${
+                    (stats?.pendingSalaryApprovals || 0) > 0 ? "text-amber-100/80" : "text-slate-400"
+                  }`}>Pending review</p>
+                </div>
+              </Link>
+
+              {/* Pending Payroll Approval */}
+              <Link to="/payroll" className="group">
+                <div className={`relative overflow-hidden rounded-2xl p-5 text-left border transition-all duration-150 hover:shadow-lg ${
+                  (stats?.pendingPayrollApprovals || 0) > 0
+                    ? "bg-violet-500 border-violet-400 text-white shadow-violet-500/20 shadow-md"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60"
+                }`}>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 blur-2xl rounded-full pointer-events-none" />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider font-mono block ${
+                    (stats?.pendingPayrollApprovals || 0) > 0 ? "text-violet-100" : "text-slate-500 dark:text-slate-400"
+                  }`}>Payroll Approval</span>
+                  <p className={`text-3xl font-normal font-mono mt-2 ${
+                    (stats?.pendingPayrollApprovals || 0) > 0 ? "text-white" : "text-violet-500"
+                  }`}>{stats?.pendingPayrollApprovals || 0}</p>
+                  <p className={`text-[10px] mt-1 font-body ${
+                    (stats?.pendingPayrollApprovals || 0) > 0 ? "text-violet-100/80" : "text-slate-400"
+                  }`}>Awaiting approval</p>
+                </div>
+              </Link>
+
+              {/* Pending Leave Requests */}
+              <Link to="/leave" className="group">
+                <div className={`relative overflow-hidden rounded-2xl p-5 text-left border transition-all duration-150 hover:shadow-lg ${
+                  (stats?.pendingLeaveRequests || 0) > 0
+                    ? "bg-blue-500 border-blue-400 text-white shadow-blue-500/20 shadow-md"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60"
+                }`}>
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-white/10 blur-2xl rounded-full pointer-events-none" />
+                  <span className={`text-[10px] font-bold uppercase tracking-wider font-mono block ${
+                    (stats?.pendingLeaveRequests || 0) > 0 ? "text-blue-100" : "text-slate-500 dark:text-slate-400"
+                  }`}>Leave Requests</span>
+                  <p className={`text-3xl font-normal font-mono mt-2 ${
+                    (stats?.pendingLeaveRequests || 0) > 0 ? "text-white" : "text-blue-500"
+                  }`}>{stats?.pendingLeaveRequests || 0}</p>
+                  <p className={`text-[10px] mt-1 font-body ${
+                    (stats?.pendingLeaveRequests || 0) > 0 ? "text-blue-100/80" : "text-slate-400"
+                  }`}>Pending review</p>
+                </div>
+              </Link>
+
+              {/* Audit Log shortcut */}
+              <Link to="/audit-logs" className="group">
+                <div className="relative overflow-hidden rounded-2xl p-5 text-left border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800 hover:shadow-md transition-all duration-150">
+                  <div className="absolute top-0 right-0 w-20 h-20 bg-white/5 blur-2xl rounded-full pointer-events-none" />
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-mono block text-slate-500 dark:text-slate-400">Audit Log</span>
+                  <div className="mt-2 flex items-center gap-2">
+                    <Shield size={24} className="text-[var(--brand-primary)]" weight="duotone" />
+                  </div>
+                  <p className="text-[10px] mt-1 font-body text-slate-400">View full trail →</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
+
+        {/* ── HR Action Items (HR-only, non-admin) ─────────────────────────── */}
+        {isHR() && !isAdmin() && (
+          <div className="space-y-3">
+            <h2 className="text-[11px] font-bold uppercase tracking-[0.12em] text-slate-500 dark:text-slate-400 font-mono flex items-center gap-2">
+              <Pulse size={12} className="text-[var(--brand-primary)]" weight="fill" />
+              Your Action Items
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Link to="/payroll" className="group">
+                <div className={`rounded-2xl p-5 text-left border transition-all hover:shadow-md ${
+                  (stats?.payrollDrafts || 0) > 0
+                    ? "bg-gradient-to-tr from-blue-600 to-cyan-600 text-white border-blue-500/30 shadow-md"
+                    : "bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700/60"
+                }`}>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider font-mono block ${
+                    (stats?.payrollDrafts || 0) > 0 ? "text-cyan-100" : "text-slate-500 dark:text-slate-400"
+                  }`}>Payroll Drafts</span>
+                  <p className={`text-3xl font-normal font-mono mt-2 ${
+                    (stats?.payrollDrafts || 0) > 0 ? "text-white" : "text-[var(--brand-primary)]"
+                  }`}>{stats?.payrollDrafts || 0}</p>
+                  <p className={`text-[10px] mt-1 font-body ${
+                    (stats?.payrollDrafts || 0) > 0 ? "text-cyan-100/80" : "text-slate-400"
+                  }`}>Submit for approval</p>
+                </div>
+              </Link>
+
+              <Link to="/payroll" className="group">
+                <div className="rounded-2xl p-5 text-left border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800 hover:shadow-md transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-mono block text-slate-500 dark:text-slate-400">Salary Requests Sent</span>
+                  <p className="text-3xl font-normal font-mono text-amber-500 mt-2">{stats?.salaryRequestsSent || 0}</p>
+                  <p className="text-[10px] mt-1 font-body text-slate-400">Awaiting Admin approval</p>
+                </div>
+              </Link>
+
+              <Link to="/recruitment" className="group">
+                <div className="rounded-2xl p-5 text-left border border-slate-200 dark:border-slate-700/60 bg-white dark:bg-slate-800 hover:shadow-md transition-all">
+                  <span className="text-[10px] font-bold uppercase tracking-wider font-mono block text-slate-500 dark:text-slate-400">Recruitment Pipeline</span>
+                  <p className="text-3xl font-normal font-mono text-emerald-500 mt-2">{stats?.recruitmentPipelineCount || 0}</p>
+                  <p className="text-[10px] mt-1 font-body text-slate-400">Active candidates</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Bento Grid layout */}
         {isHR() ? (

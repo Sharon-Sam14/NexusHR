@@ -13,5 +13,6 @@ com\nexushr\service\RefreshTokenService$TokenPair.class
 com\nexushr\repository\RefreshTokenRepository.class
 com\nexushr\controller\AuthController.class
 com\nexushr\security\SecurityHelper.class
+com\nexushr\controller\UserController.class
 com\nexushr\security\JwtFilter.class
 com\nexushr\entity\RefreshToken$RefreshTokenBuilder.class

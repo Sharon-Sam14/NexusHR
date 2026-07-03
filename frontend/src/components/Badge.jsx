@@ -5,9 +5,9 @@ const statusToVariant = (status) => {
   const s = status.toUpperCase();
   if (['APPROVED', 'PRESENT', 'ACTIVE', 'PAID', 'OPEN', 'HIRED', 'ACKNOWLEDGED', 'SUCCESS'].includes(s)) return 'success';
   if (['REJECTED', 'ABSENT', 'TERMINATED', 'DANGER', 'ERROR', 'FAILED'].includes(s)) return 'danger';
-  if (['PENDING', 'HALF_DAY', 'LATE', 'SCREENING', 'WARNING'].includes(s)) return 'warning';
+  if (['PENDING', 'PENDING_APPROVAL', 'PENDING_REOPEN', 'HALF_DAY', 'LATE', 'SCREENING', 'WARNING'].includes(s)) return 'warning';
   if (['PROCESSED', 'INTERVIEWING', 'ON_LEAVE', 'HOLIDAY', 'OFFER_EXTENDED', 'SUBMITTED', 'INFO'].includes(s)) return 'info';
-  if (['IN_REVIEW'].includes(s)) return 'purple';
+  if (['IN_REVIEW', 'DRAFT'].includes(s)) return 'purple';
   if (['PRIMARY'].includes(s)) return 'primary';
   if (['CLOSED', 'INACTIVE'].includes(s)) return 'default';
   return 'default';

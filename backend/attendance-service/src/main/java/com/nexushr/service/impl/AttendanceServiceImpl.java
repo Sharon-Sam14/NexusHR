@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.nexushr.util.AuditLogger;
 import org.springframework.transaction.annotation.Transactional;
 
 
@@ -51,6 +52,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Attendance saved = attendanceRepository.save(attendance);
         attendanceEventPublisher.publishPunch(saved, "CHECK_IN");
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "ATTENDANCE_CHECK_IN", employee.getEmployeeName(), "Checked in today");
         return toDTO(saved);
     }
 
@@ -69,6 +71,7 @@ public class AttendanceServiceImpl implements AttendanceService {
 
         Attendance saved = attendanceRepository.save(attendance);
         attendanceEventPublisher.publishPunch(saved, "CHECK_OUT");
+        AuditLogger.log(AuditLogger.getCurrentUserEmail(), "ATTENDANCE_CHECK_OUT", saved.getEmployee().getEmployeeName(), "Checked out, total hours: " + saved.getWorkHours());
         return toDTO(saved);
     }
 

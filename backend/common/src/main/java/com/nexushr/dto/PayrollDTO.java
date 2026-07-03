@@ -29,6 +29,8 @@ public class PayrollDTO {
     private Integer daysPresent;
     private Double overtimeHours;
     private Double overtimePay;
+    private Double allowances;
+    private Double reimbursements;
     private String remarks;
 
 }

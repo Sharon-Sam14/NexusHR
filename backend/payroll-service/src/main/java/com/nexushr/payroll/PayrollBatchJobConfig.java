@@ -115,7 +115,7 @@ public class PayrollBatchJobConfig {
                         .overtimeHours(result.overtimeHours())
                         .overtimePay(result.overtimePay())
                         .netSalary(result.netSalary())
-                        .status(PayrollStatus.PENDING)
+                        .status(PayrollStatus.PROCESSED)
                         .workingDays(workingDays)
                         .daysPresent(workingDays)
                         .remarks("Batch auto-generated for " + month + "/" + year + " | Tax: " + result.taxBracketLabel())

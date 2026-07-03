@@ -61,4 +61,14 @@ public class User {
     @Builder.Default
     private boolean active = true;
 
+    /*
+     * Password reset token
+     */
+    private String resetToken;
+
+    /*
+     * Password reset token expiry time
+     */
+    private java.time.LocalDateTime resetTokenExpiry;
+
 }

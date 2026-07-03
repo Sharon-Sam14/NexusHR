@@ -25,6 +25,18 @@ public class DashboardStatsDTO {
     private Double avgPerformanceRating;
     private Long unreadNotifications;
 
+    // Admin queue counts
+    private Long pendingSalaryApprovals;
+    private Long pendingPayrollApprovals;
+    private Long pendingLeaveRequests;
+    private Long attendanceCorrections;
+    private Long inactiveEmployees;
+
+    // HR queue counts
+    private Long payrollDrafts;
+    private Long salaryRequestsSent;
+    private Long recruitmentPipelineCount;
+
     // Dynamic Employee of the Month
     private String bestEmployeeName;
     private String bestEmployeeDesignation;

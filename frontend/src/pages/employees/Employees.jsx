@@ -14,7 +14,7 @@ import Card from "../../components/ui/Card";
 import Button from "../../components/ui/Button";
 
 export default function Employees() {
-  const { isHR } = useAuth();
+  const { isHR, isAdmin } = useAuth();
   const [employees, setEmployees] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -194,13 +194,15 @@ export default function Employees() {
         >
           <PencilSimpleLine size={15} />
         </button>
-        <button
-          onClick={() => handleOpenDelete(row)}
-          className="p-1 rounded text-red-500 hover:bg-red-500/10 transition-colors"
-          title="Delete"
-        >
-          <Trash size={15} />
-        </button>
+        {isAdmin() && (
+          <button
+            onClick={() => handleOpenDelete(row)}
+            className="p-1 rounded text-red-500 hover:bg-red-500/10 transition-colors"
+            title="Delete"
+          >
+            <Trash size={15} />
+          </button>
+        )}
       </div>
     );
   };
@@ -397,12 +399,16 @@ export default function Employees() {
                   <input
                     type="number"
                     required
+                    disabled={!isAdmin()}
                     value={formData.salary}
                     onChange={(e) => setFormData({ ...formData, salary: parseFloat(e.target.value) || "" })}
                     className="input-field pl-9 font-mono"
                     placeholder="6500"
                   />
                 </div>
+                {!isAdmin() && (
+                  <p className="text-[10px] text-amber-500 mt-1 font-body">Salary revisions must be submitted via the Payroll page.</p>
+                )}
               </div>
 
               <div className="space-y-1">
@@ -443,6 +449,7 @@ export default function Employees() {
                 <label className="text-[10px] uppercase font-semibold text-slate-500 tracking-wider font-mono">Status *</label>
                 <select
                   required
+                  disabled={!isAdmin()}
                   value={formData.status}
                   onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   className="select-field"

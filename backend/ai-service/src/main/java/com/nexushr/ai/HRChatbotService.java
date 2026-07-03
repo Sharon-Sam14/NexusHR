@@ -25,6 +25,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
+@SuppressWarnings("null")
 public class HRChatbotService {
 
     private final EmployeeRepository employeeRepository;

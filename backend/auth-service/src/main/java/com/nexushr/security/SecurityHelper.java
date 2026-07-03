@@ -10,12 +10,14 @@ import com.nexushr.repository.EmployeeDocumentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 /*
  * Security Helper to evaluate owner permissions in SpEL annotations.
  */
 @Component("securityHelper")
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class SecurityHelper {
 
     private final UserRepository userRepository;
