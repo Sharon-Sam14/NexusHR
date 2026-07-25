@@ -32,4 +32,22 @@ public class EmployeeDocument {
 
     private LocalDateTime uploadedAt;
 
+    private String publicId;
+
+    private String secureUrl;
+
+    private String uploader;
+
+    /*
+     * Optional: references the leave_request this document was uploaded for
+     * (populated for MEDICAL_CERTIFICATE document type)
+     */
+    private Long leaveRequestId;
+
+    /*
+     * Document category: MEDICAL_CERTIFICATE, ONBOARDING, CONTRACT, OTHER
+     */
+    @Builder.Default
+    private String documentType = "OTHER";
+
 }

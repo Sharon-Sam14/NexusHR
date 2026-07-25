@@ -42,6 +42,8 @@ erDiagram
         bigint file_size
         date upload_date
         varchar file_path
+        bigint leave_request_id
+        varchar document_type
     }
     attendance {
         bigint id PK
@@ -150,15 +152,20 @@ erDiagram
     *   `emergency_contact` (varchar, Nullable): Name and phone of contact.
 
 ### 3. `employee_documents` Table
-*   Tracks file attachments associated with employee onboarding/records.
+*   Tracks file attachments associated with employee onboarding, profile, or medical leave.
 *   *Columns:*
-    *   `id` (bigint, PK): Auto-incrementing identifier.
-    *   `employee_id` (bigint, FK, Not Null): References corresponding employee in `employees`.
-    *   `file_name` (varchar, Not Null): Original name of upload.
-    *   `file_type` (varchar, Not Null): MIME file type.
-    *   `file_size` (bigint, Not Null): File size in bytes.
-    *   `upload_date` (date, Not Null): Date upload occurred.
-    *   `file_path` (varchar, Not Null): Local disk storage location path.
+*   `id` (bigint, PK): Auto-incrementing identifier.
+*   `employee_id` (bigint, FK, Not Null): References corresponding employee in `employees`.
+*   `file_name` (varchar, Not Null): Original name of upload.
+*   `file_type` (varchar, Not Null): MIME file type.
+*   `file_size` (bigint, Not Null): File size in bytes.
+*   `upload_date` (date, Not Null): Date upload occurred.
+*   `file_path` (varchar, Not Null): Cloudinary secure URL, or local path fallback.
+*   `public_id` (varchar, Nullable): Cloudinary unique asset ID.
+*   `secure_url` (varchar, Nullable): Cloudinary HTTPS link.
+*   `uploader` (varchar, Nullable): Email of user performing the upload.
+*   `leave_request_id` (bigint, Nullable): References `leave_requests` (used to link medical certificate uploads to specific leaves).
+*   `document_type` (varchar, Default 'OTHER'): Document category (`MEDICAL_CERTIFICATE`, `ONBOARDING`, `CONTRACT`, `OTHER`).
 
 ### 4. `attendance` Table
 *   Logs biometric timestamps and daily check-ins.

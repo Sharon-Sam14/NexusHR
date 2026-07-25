@@ -26,7 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-@SuppressWarnings("null")
 public class LeaveBalanceEngine {
 
     private final EmployeeRepository employeeRepository;

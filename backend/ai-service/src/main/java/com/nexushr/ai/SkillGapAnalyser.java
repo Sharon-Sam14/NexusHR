@@ -24,7 +24,6 @@ import java.util.OptionalDouble;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@SuppressWarnings("null")
 public class SkillGapAnalyser {
 
     private final EmployeeRepository employeeRepository;

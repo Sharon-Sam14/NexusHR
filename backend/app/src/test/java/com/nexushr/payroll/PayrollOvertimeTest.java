@@ -17,7 +17,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
-@SuppressWarnings("null")
 public class PayrollOvertimeTest {
 
     @Autowired
@@ -59,6 +58,9 @@ public class PayrollOvertimeTest {
     @Autowired
     private DepartmentRepository departmentRepository;
 
+    @Autowired
+    private SalaryApprovalRequestRepository salaryApprovalRequestRepository;
+
     private Employee testEmployee;
 
     @BeforeEach
@@ -67,6 +69,7 @@ public class PayrollOvertimeTest {
         userRepository.deleteAll();
         goalRepository.deleteAll();
         performanceRepository.deleteAll();
+        salaryApprovalRequestRepository.deleteAll();
         payrollRepository.deleteAll();
         leaveRequestRepository.deleteAll();
         attendanceRepository.deleteAll();

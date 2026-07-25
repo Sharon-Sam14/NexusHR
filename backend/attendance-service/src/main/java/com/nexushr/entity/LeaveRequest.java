@@ -12,7 +12,9 @@ import java.time.LocalDate;
  */
 
 @Entity
-@Table(name = "leave_requests")
+@Table(name = "leave_requests", indexes = {
+    @Index(name = "idx_leave_emp_status", columnList = "employee_id, status")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -79,5 +81,10 @@ public class LeaveRequest {
      * Application date
      */
     private LocalDate appliedDate;
+
+    /*
+     * Reference to uploaded medical certificate (EmployeeDocument ID)
+     */
+    private Long medicalCertificateId;
 
 }

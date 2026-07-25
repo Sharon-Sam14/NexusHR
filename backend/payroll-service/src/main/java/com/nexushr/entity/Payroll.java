@@ -10,7 +10,9 @@ import lombok.*;
  */
 
 @Entity
-@Table(name = "payrolls")
+@Table(name = "payrolls", indexes = {
+    @Index(name = "idx_payroll_emp_period", columnList = "employee_id, month, year")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

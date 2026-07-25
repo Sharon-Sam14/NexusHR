@@ -28,5 +28,12 @@ public class LeaveRequestDTO {
     private String approvedBy;
     private String approvalRemarks;
     private LocalDate appliedDate;
+    private Long medicalCertificateId;
+    /*
+     * Populated from EmployeeDocument lookup for SICK leave requests.
+     * Allows HR to preview/download certificate directly from the leave table.
+     */
+    private String medicalCertificateUrl;
+    private String medicalCertificateFileName;
 
 }

@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-@SuppressWarnings("null")
 public class ReviewCycleService {
 
     private final PerformanceRepository performanceRepository;

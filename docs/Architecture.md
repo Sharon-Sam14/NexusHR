@@ -45,9 +45,9 @@ graph TD
 
 ---
 
-## 1. Backend Multi-Tier Software Patterns
+## 1. Backend Software Tiering
 
-The Spring Boot backend is structured as a decoupled, multi-tier service complying with standard Java Enterprise MVC principles:
+The Spring Boot backend is structured as a decoupled, multi-tier service:
 
 1.  **Presentation/Web Layer (Controllers):** Handles incoming REST requests, maps inputs (DTOs), and returns JSON response payloads. This layer is annotated with `@RestController` and secured using class/method-level `@PreAuthorize` rules.
 2.  **Security Layer (JWT Filters):** Intercepts requests to validate signature integrity, parse user authority scopes, and populate the thread-local security context.
@@ -111,3 +111,34 @@ The React Single Page Application (SPA) is built around a centralized authentica
 
 ### 3. Navigation Guarding:
 *   Frontend routes inside `App.jsx` are wrapped in a high-order component (`ProtectedRoute`) to check user roles, preventing normal employees from accessing settings or admin modules.
+
+---
+
+## 4. File Storage: Local vs. Cloud (Cloudinary)
+
+*   **Current Architecture**: NexusHR uses the local host system disk under the `./uploads/` directory to store onboarding documents and profile photos. This simplifies local development setups.
+*   **How to Migrate to Cloudinary**:
+    1.  Add the Cloudinary Java SDK dependency in `pom.xml`:
+        ```xml
+        <dependency>
+            <groupId>com.cloudinary</groupId>
+            <artifactId>cloudinary-http44</artifactId>
+            <version>1.36.0</version>
+        </dependency>
+        ```
+    2.  Add Cloudinary settings in `application.properties`:
+        ```properties
+        cloudinary.cloud_name=your_cloud_name
+        cloudinary.api_key=your_api_key
+        cloudinary.api_secret=your_api_secret
+        ```
+    3.  Update the upload code in [DocumentController.java](file:///c:/Users/sharo/Desktop/NexusHR-main/backend/employee-service/src/main/java/com/nexushr/controller/DocumentController.java):
+        ```java
+        Cloudinary cloudinary = new Cloudinary(ObjectUtils.asMap(
+            "cloud_name", cloudName,
+            "api_key", apiKey,
+            "api_secret", apiSecret
+        ));
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
+        String secureUrl = (String) uploadResult.get("secure_url");
+        ```

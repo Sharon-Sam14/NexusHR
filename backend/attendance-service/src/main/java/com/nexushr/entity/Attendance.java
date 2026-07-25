@@ -13,7 +13,9 @@ import java.time.LocalTime;
  */
 
 @Entity
-@Table(name = "attendance")
+@Table(name = "attendance", indexes = {
+    @Index(name = "idx_attendance_emp_date", columnList = "employee_id, date")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

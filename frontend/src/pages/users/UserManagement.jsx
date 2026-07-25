@@ -110,11 +110,11 @@ export default function UserManagement() {
       label: "User",
       render: (val, row) => (
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-[4px] bg-slate-105 dark:bg-slate-805 flex items-center justify-center font-mono font-medium text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs">
+          <div className="w-8 h-8 rounded-[4px] bg-slate-100 dark:bg-slate-800 flex items-center justify-center font-mono font-medium text-slate-800 dark:text-slate-200 border border-slate-200 dark:border-slate-800 text-xs">
             {val.charAt(0)}
           </div>
           <div>
-            <p className="font-medium text-slate-850 dark:text-slate-200">{val}</p>
+            <p className="font-medium text-slate-800 dark:text-slate-200">{val}</p>
             <p className="text-[10px] text-slate-500 font-mono tracking-wider uppercase">{row.email}</p>
           </div>
         </div>

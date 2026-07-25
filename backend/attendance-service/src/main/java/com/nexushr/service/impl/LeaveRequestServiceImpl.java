@@ -5,8 +5,10 @@ import com.nexushr.dto.NotificationDTO;
 import com.nexushr.entity.Employee;
 import com.nexushr.entity.LeaveRequest;
 import com.nexushr.entity.LeaveStatus;
+import com.nexushr.entity.LeaveType;
 import com.nexushr.repository.EmployeeRepository;
 import com.nexushr.repository.LeaveRequestRepository;
+import com.nexushr.repository.EmployeeDocumentRepository;
 import com.nexushr.service.LeaveRequestService;
 import com.nexushr.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -25,18 +27,29 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 @Transactional
 public class LeaveRequestServiceImpl implements LeaveRequestService {
 
     private final LeaveRequestRepository leaveRequestRepository;
     private final EmployeeRepository employeeRepository;
     private final NotificationService notificationService;
+    private final EmployeeDocumentRepository employeeDocumentRepository;
 
     @Override
     public LeaveRequestDTO applyLeave(LeaveRequestDTO dto) {
         Employee employee = employeeRepository.findById(dto.getEmployeeId())
                 .orElseThrow(() -> new RuntimeException("Employee not found"));
+
+        // Validation: Medical Leave MUST require document upload
+        if (dto.getLeaveType() == LeaveType.SICK) {
+            if (dto.getMedicalCertificateId() == null) {
+                throw new IllegalArgumentException("Medical/Sick leave requests must include a medical certificate document upload.");
+            }
+            boolean docExists = employeeDocumentRepository.existsById(dto.getMedicalCertificateId());
+            if (!docExists) {
+                throw new IllegalArgumentException("Invalid medical certificate document ID: " + dto.getMedicalCertificateId());
+            }
+        }
 
         int totalDays = (int) ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate()) + 1;
 
@@ -53,6 +66,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                 .reason(dto.getReason())
                 .status(LeaveStatus.PENDING)
                 .appliedDate(LocalDate.now())
+                .medicalCertificateId(dto.getMedicalCertificateId())
                 .build();
 
         LeaveRequestDTO saved = toDTO(leaveRequestRepository.save(request));
@@ -210,7 +224,7 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
     }
 
     private LeaveRequestDTO toDTO(LeaveRequest r) {
-        return LeaveRequestDTO.builder()
+        LeaveRequestDTO.LeaveRequestDTOBuilder builder = LeaveRequestDTO.builder()
                 .id(r.getId())
                 .employeeId(r.getEmployee().getId())
                 .employeeName(r.getEmployee().getEmployeeName())
@@ -224,7 +238,17 @@ public class LeaveRequestServiceImpl implements LeaveRequestService {
                 .approvedBy(r.getApprovedBy())
                 .approvalRemarks(r.getApprovalRemarks())
                 .appliedDate(r.getAppliedDate())
-                .build();
+                .medicalCertificateId(r.getMedicalCertificateId());
+
+        // Populate medical certificate URL for SICK leave requests
+        if (r.getMedicalCertificateId() != null) {
+            employeeDocumentRepository.findById(r.getMedicalCertificateId()).ifPresent(doc -> {
+                builder.medicalCertificateUrl(doc.getSecureUrl());
+                builder.medicalCertificateFileName(doc.getFileName());
+            });
+        }
+
+        return builder.build();
     }
 
 }

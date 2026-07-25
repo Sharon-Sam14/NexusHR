@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @RequiredArgsConstructor
 @Slf4j
 @EnableAsync
-@SuppressWarnings("null")
 public class PayrollBatchJobConfig {
 
     private final EmployeeRepository employeeRepository;

@@ -1,0 +1,10 @@
+**/target/
+*.class
+*.jar
+*.log
+node_modules/
+.vscode/
+.idea/
+uploads/
+/backend/uploads/
+*.log*

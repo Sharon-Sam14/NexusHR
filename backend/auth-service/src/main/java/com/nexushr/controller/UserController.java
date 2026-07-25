@@ -23,7 +23,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @PreAuthorize("hasRole('ADMIN')")
-@SuppressWarnings("null")
 public class UserController {
 
     private final UserRepository userRepository;

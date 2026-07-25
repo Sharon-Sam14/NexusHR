@@ -14,4 +14,9 @@ public class DocumentDTO {
     private String fileType;
     private Long fileSize;
     private LocalDateTime uploadedAt;
+    private String publicId;
+    private String secureUrl;
+    private String uploader;
+    private Long leaveRequestId;
+    private String documentType;
 }

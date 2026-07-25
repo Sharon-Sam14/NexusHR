@@ -1,0 +1,249 @@
+﻿[INFO] Scanning for projects...
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] NexusHR Parent                                                     [pom]
+[INFO] NexusHR Common                                                     [jar]
+[INFO] NexusHR Employee Service                                           [jar]
+[INFO] NexusHR Notification Service                                       [jar]
+[INFO] NexusHR Attendance Service                                         [jar]
+[INFO] NexusHR Payroll Service                                            [jar]
+[INFO] NexusHR Performance Service                                        [jar]
+[INFO] NexusHR AI Service                                                 [jar]
+[INFO] NexusHR Auth Service                                               [jar]
+[INFO] NexusHR App Bootstrapper                                           [jar]
+[INFO] 
+[INFO] ------------------------< com.nexushr:backend >-------------------------
+[INFO] Building NexusHR Parent 0.0.1-SNAPSHOT                            [1/10]
+[INFO]   from pom.xml
+[INFO] --------------------------------[ pom ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ backend ---
+[INFO] 
+[INFO] -------------------------< com.nexushr:common >-------------------------
+[INFO] Building NexusHR Common 0.0.1-SNAPSHOT                            [2/10]
+[INFO]   from common\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ common ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\common\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ common ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\common\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\common\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ common ---
+[INFO] Changes detected - recompiling the module! :source
+[INFO] Compiling 33 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] --------------------< com.nexushr:employee-service >--------------------
+[INFO] Building NexusHR Employee Service 0.0.1-SNAPSHOT                  [3/10]
+[INFO]   from employee-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ employee-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ employee-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ employee-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 27 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] /C:/Users/sharo/Desktop/NexusHR-main/backend/employee-service/src/main/java/com/nexushr/service/CloudinaryService.java: C:\Users\sharo\Desktop\NexusHR-main\backend\employee-service\src\main\java\com\nexushr\service\CloudinaryService.java uses unchecked or unsafe operations.
+[INFO] /C:/Users/sharo/Desktop/NexusHR-main/backend/employee-service/src/main/java/com/nexushr/service/CloudinaryService.java: Recompile with -Xlint:unchecked for details.
+[INFO] 
+[INFO] ------------------< com.nexushr:notification-service >------------------
+[INFO] Building NexusHR Notification Service 0.0.1-SNAPSHOT              [4/10]
+[INFO]   from notification-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ notification-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\notification-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ notification-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\notification-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\notification-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ notification-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 8 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] -------------------< com.nexushr:attendance-service >-------------------
+[INFO] Building NexusHR Attendance Service 0.0.1-SNAPSHOT                [5/10]
+[INFO]   from attendance-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ attendance-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\attendance-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ attendance-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\attendance-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\attendance-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ attendance-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 15 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] --------------------< com.nexushr:payroll-service >---------------------
+[INFO] Building NexusHR Payroll Service 0.0.1-SNAPSHOT                   [6/10]
+[INFO]   from payroll-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ payroll-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\payroll-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ payroll-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\payroll-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\payroll-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ payroll-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 14 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] ------------------< com.nexushr:performance-service >-------------------
+[INFO] Building NexusHR Performance Service 0.0.1-SNAPSHOT               [7/10]
+[INFO]   from performance-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ performance-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\performance-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ performance-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\performance-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\performance-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ performance-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 11 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] -----------------------< com.nexushr:ai-service >-----------------------
+[INFO] Building NexusHR AI Service 0.0.1-SNAPSHOT                        [8/10]
+[INFO]   from ai-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ ai-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\ai-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ ai-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\ai-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\ai-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ ai-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 6 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] ----------------------< com.nexushr:auth-service >----------------------
+[INFO] Building NexusHR Auth Service 0.0.1-SNAPSHOT                      [9/10]
+[INFO]   from auth-service\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ auth-service ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\auth-service\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ auth-service ---
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\auth-service\src\main\resources
+[INFO] skip non existing resourceDirectory C:\Users\sharo\Desktop\NexusHR-main\backend\auth-service\src\main\resources
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ auth-service ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 16 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] 
+[INFO] --------------------------< com.nexushr:app >---------------------------
+[INFO] Building NexusHR App Bootstrapper 0.0.1-SNAPSHOT                 [10/10]
+[INFO]   from app\pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.3.2:clean (default-clean) @ app ---
+[INFO] Deleting C:\Users\sharo\Desktop\NexusHR-main\backend\app\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ app ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ app ---
+[INFO] Changes detected - recompiling the module! :dependency
+[INFO] Compiling 5 source files with javac [debug release 21] to target\classes
+[INFO] Annotation processing is enabled because one or more processors were found
+  on the class path. A future release of javac may disable annotation processing
+  unless at least one processor is specified by name (-processor), or a search
+  path is specified (--processor-path, --processor-module-path), or annotation
+  processing is enabled explicitly (-proc:only, -proc:full).
+  Use -Xlint:-options to suppress this message.
+  Use -proc:none to disable annotation processing.
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for NexusHR Parent 0.0.1-SNAPSHOT:
+[INFO] 
+[INFO] NexusHR Parent ..................................... SUCCESS [  0.730 s]
+[INFO] NexusHR Common ..................................... SUCCESS [ 27.185 s]
+[INFO] NexusHR Employee Service ........................... SUCCESS [ 15.229 s]
+[INFO] NexusHR Notification Service ....................... SUCCESS [  4.534 s]
+[INFO] NexusHR Attendance Service ......................... SUCCESS [  2.291 s]
+[INFO] NexusHR Payroll Service ............................ SUCCESS [  2.320 s]
+[INFO] NexusHR Performance Service ........................ SUCCESS [  2.453 s]
+[INFO] NexusHR AI Service ................................. SUCCESS [  1.968 s]
+[INFO] NexusHR Auth Service ............................... SUCCESS [  2.482 s]
+[INFO] NexusHR App Bootstrapper ........................... SUCCESS [  2.483 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:04 min
+[INFO] Finished at: 2026-07-25T14:27:37+05:30
+[INFO] ------------------------------------------------------------------------

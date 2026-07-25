@@ -24,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 @Transactional
 public class PayrollServiceImpl implements PayrollService {
 

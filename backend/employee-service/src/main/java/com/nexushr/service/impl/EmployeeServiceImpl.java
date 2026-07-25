@@ -1,11 +1,13 @@
 package com.nexushr.service.impl;
 
 import com.nexushr.dto.EmployeeDTO;
+import com.nexushr.dto.EmployeeCreatedEvent;
 import com.nexushr.entity.Employee;
 import com.nexushr.entity.EmployeeStatus;
 import com.nexushr.repository.EmployeeRepository;
 import com.nexushr.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -19,11 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
  */
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 @Transactional
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     public List<EmployeeDTO> getAllEmployees() {
@@ -47,6 +49,10 @@ public class EmployeeServiceImpl implements EmployeeService {
         }
         Employee saved = employeeRepository.save(employee);
         AuditLogger.log(AuditLogger.getCurrentUserEmail(), "EMPLOYEE_CREATED", saved.getEmployeeName(), "Initial Salary: " + saved.getSalary());
+        
+        // Trigger asynchronous event listener for credentials and notification dispatch
+        eventPublisher.publishEvent(new EmployeeCreatedEvent(this, saved));
+        
         return toDTO(saved);
     }
 

@@ -24,7 +24,6 @@ import java.util.Map;
 @RequestMapping("/api/payroll")
 @CrossOrigin(origins = "*")
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class PayrollBatchController {
 
     private final PayrollBatchJobConfig batchJobConfig;

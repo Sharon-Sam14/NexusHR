@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional
-@SuppressWarnings("null")
 public class SalaryApprovalServiceImpl implements SalaryApprovalService {
 
     private final SalaryApprovalRequestRepository requestRepository;

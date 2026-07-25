@@ -26,7 +26,6 @@ import java.util.UUID;
  */
 @Service
 @RequiredArgsConstructor
-@SuppressWarnings("null")
 public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;

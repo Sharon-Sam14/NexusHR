@@ -6,21 +6,19 @@ This document details the configuration and deployment procedures for setting up
 
 ## 💻 Part 1: Local Development Setup
 
-To run the application locally, ensure you have Java 22, Node.js (v18+), and a running instance of PostgreSQL.
+To run the application locally, ensure you have Java 21, Node.js (v18+), and a running instance of PostgreSQL.
 
 ### 1. Database Setup
 1.  Connect to your PostgreSQL server and create a database named `nexushr`:
     ```sql
     CREATE DATABASE nexushr;
     ```
-2.  Open `backend/src/main/resources/application.properties` and verify your connection parameters:
+2.  Open `backend/app/src/main/resources/application.properties` and verify your connection parameters:
     ```properties
     spring.datasource.url=jdbc:postgresql://localhost:5432/nexushr
     spring.datasource.username=your_postgres_username
     spring.datasource.password=your_postgres_password
     ```
-
----
 
 ### 2. Backend Server Launch
 1.  Navigate to the `backend` directory:
@@ -29,15 +27,13 @@ To run the application locally, ensure you have Java 22, Node.js (v18+), and a r
     ```
 2.  Build the Maven project to resolve dependencies:
     ```bash
-    ./mvnw clean compile
+    mvn clean compile
     ```
 3.  Start the Spring Boot application:
     ```bash
-    ./mvnw spring-boot:run
+    mvn spring-boot:run -pl app
     ```
     *The server will boot, automatically migrate the PostgreSQL database schema, and seed default user accounts. It will be listening on:* `http://localhost:8081`
-
----
 
 ### 3. Frontend Client Launch
 1.  Navigate to the `frontend` directory:
@@ -63,11 +59,11 @@ When deploying to cloud platforms, the backend is built into an executable JAR, 
 ### 1. Backend Production Assembly (JAR)
 Assemble the production package using the Maven command:
 ```bash
-./mvnw clean package -DskipTests
+mvn clean package -DskipTests
 ```
-This compiles the classes and saves the executable archive `backend-0.0.1-SNAPSHOT.jar` inside the `backend/target/` directory. You can run it on any server utilizing:
+This compiles the classes and saves the executable archive `app-0.0.1-SNAPSHOT.jar` inside the `backend/app/target/` directory. You can run it on any server utilizing:
 ```bash
-java -jar target/backend-0.0.1-SNAPSHOT.jar
+java -jar app/target/app-0.0.1-SNAPSHOT.jar
 ```
 
 ### 2. Frontend Production Build (HTML/JS/CSS Bundle)
@@ -79,15 +75,55 @@ This builds your React Single Page Application and outputs minified static asset
 
 ---
 
-## 🔑 Environment Variables & Security Configuration
+## 🐳 Part 3: Containerization with Docker
 
-When deploying to cloud providers (e.g. Render, Supabase, Vercel), overwrite properties using environment variables:
+We package the entire multi-service layout using Docker and coordinate container starts using Docker Compose.
 
-| Property Name | Environment Variable Override | Description |
-| :--- | :--- | :--- |
-| `spring.datasource.url` | `SPRING_DATASOURCE_URL` | JDBC database connection URI |
-| `spring.datasource.username` | `SPRING_DATASOURCE_USERNAME` | PostgreSQL database user username |
-| `spring.datasource.password` | `SPRING_DATASOURCE_PASSWORD` | PostgreSQL database user password |
-| `jwt.secret` | `JWT_SECRET` | 256-bit cryptographically secure token signing key |
-| `jwt.expiration` | `JWT_EXPIRATION` | Session lifetime parameter in milliseconds |
-| `server.port` | `PORT` | Listening network port of the Spring Boot application |
+### 1. Dockerfile for Spring Boot Backend
+Create a `Dockerfile` inside the `backend/` directory:
+```dockerfile
+FROM openjdk:21-slim
+VOLUME /tmp
+COPY app/target/app-0.0.1-SNAPSHOT.jar app.jar
+ENTRYPOINT ["java","-jar","/app.jar"]
+```
+
+### 2. Docker Compose Configuration
+Combine services into a single execution context:
+```yaml
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: nexushr_db
+    environment:
+      POSTGRES_DB: nexushr
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: production_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    container_name: nexushr_backend
+    ports:
+      - "8081:8081"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/nexushr
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: production_password
+    depends_on:
+      - postgres
+    volumes:
+      - ./uploads:/uploads
+
+volumes:
+  pgdata:
+```
+
+Launch the multi-container structure with:
+```bash
+docker compose up --build -d
+```

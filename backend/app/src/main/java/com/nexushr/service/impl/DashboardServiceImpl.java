@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@SuppressWarnings("null")
 public class DashboardServiceImpl implements DashboardService {
 
     private final UserRepository userRepository;
