@@ -4,13 +4,16 @@ import com.nexushr.dto.EmployeeDTO;
 import com.nexushr.dto.EmployeeCreatedEvent;
 import com.nexushr.entity.Employee;
 import com.nexushr.entity.EmployeeStatus;
+import com.nexushr.repository.DepartmentRepository;
 import com.nexushr.repository.EmployeeRepository;
 import com.nexushr.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import com.nexushr.util.AuditLogger;
@@ -22,10 +25,27 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class EmployeeServiceImpl implements EmployeeService {
 
     private final EmployeeRepository employeeRepository;
+    private final DepartmentRepository departmentRepository;
     private final ApplicationEventPublisher eventPublisher;
+
+    /**
+     * Validates that the department name exists in the departments table.
+     * Throws if the department name is blank or not found.
+     * This preserves String-based storage while enforcing referential integrity.
+     */
+    private void validateDepartment(String department) {
+        if (department == null || department.isBlank()) {
+            throw new RuntimeException("Department name must not be blank.");
+        }
+        if (!departmentRepository.existsByName(department)) {
+            throw new RuntimeException(
+                "Department '" + department + "' does not exist. Please create the department first.");
+        }
+    }
 
     @Override
     public List<EmployeeDTO> getAllEmployees() {
@@ -43,16 +63,18 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Override
     public EmployeeDTO createEmployee(EmployeeDTO dto) {
+        validateDepartment(dto.getDepartment());
         Employee employee = toEntity(dto);
         if (employee.getStatus() == null) {
             employee.setStatus(EmployeeStatus.ACTIVE);
         }
         Employee saved = employeeRepository.save(employee);
+        log.info("[EMPLOYEE] Created employee '{}' in department '{}'", saved.getEmployeeName(), saved.getDepartment());
         AuditLogger.log(AuditLogger.getCurrentUserEmail(), "EMPLOYEE_CREATED", saved.getEmployeeName(), "Initial Salary: " + saved.getSalary());
-        
+
         // Trigger asynchronous event listener for credentials and notification dispatch
         eventPublisher.publishEvent(new EmployeeCreatedEvent(this, saved));
-        
+
         return toDTO(saved);
     }
 
@@ -66,13 +88,19 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
 
         if (!isAdmin) {
-            boolean salaryChanged = dto.getSalary() != null && !existing.getSalary().equals(dto.getSalary());
-            if (salaryChanged) {
+            // Null-safe salary comparison to avoid NullPointerException when existing salary is null
+            boolean salaryChanged = !Objects.equals(existing.getSalary(), dto.getSalary());
+            if (salaryChanged && dto.getSalary() != null) {
                 throw new RuntimeException("HR cannot directly modify employee salaries. Please submit a Salary Approval Request on the Payroll page.");
             }
             if (dto.getStatus() != null && dto.getStatus() != existing.getStatus()) {
                 throw new RuntimeException("Only Admin can change employee activation status.");
             }
+        }
+
+        // Validate new department name exists in database before updating
+        if (dto.getDepartment() != null && !dto.getDepartment().equals(existing.getDepartment())) {
+            validateDepartment(dto.getDepartment());
         }
 
         existing.setEmployeeName(dto.getEmployeeName());

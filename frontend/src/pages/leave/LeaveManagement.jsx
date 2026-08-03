@@ -205,8 +205,9 @@ function DocumentCell({ leave }) {
     );
   }
 
-  const previewUrl = `http://localhost:8081/api/documents/${leave.medicalCertificateId}/preview`;
-  const downloadUrl = `http://localhost:8081/api/documents/${leave.medicalCertificateId}/download`;
+  const token = localStorage.getItem("nexushr_token");
+  const previewUrl = `/api/documents/${leave.medicalCertificateId}/preview${token ? `?token=${token}` : ""}`;
+  const downloadUrl = `/api/documents/${leave.medicalCertificateId}/download${token ? `?token=${token}` : ""}`;
 
   return (
     <div className="flex items-center gap-1">
@@ -820,7 +821,7 @@ export default function LeaveManagement() {
                 </div>
                 <div className="flex gap-1">
                   <a
-                    href={`http://localhost:8081/api/documents/${selectedLeave.medicalCertificateId}/preview`}
+                    href={`/api/documents/${selectedLeave.medicalCertificateId}/preview${localStorage.getItem("nexushr_token") ? `?token=${localStorage.getItem("nexushr_token")}` : ""}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 hover:underline font-mono"
@@ -830,7 +831,7 @@ export default function LeaveManagement() {
                   </a>
                   <span className="text-slate-300 dark:text-slate-600">|</span>
                   <a
-                    href={`http://localhost:8081/api/documents/${selectedLeave.medicalCertificateId}/download`}
+                    href={`/api/documents/${selectedLeave.medicalCertificateId}/download${localStorage.getItem("nexushr_token") ? `?token=${localStorage.getItem("nexushr_token")}` : ""}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-[10px] text-emerald-600 dark:text-emerald-400 hover:underline font-mono"

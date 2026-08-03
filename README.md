@@ -223,6 +223,16 @@ NexusHR/
 
 ---
 
+## ☁️ Deployment & Production Configurations
+
+The application is configured for production environments:
+- **Backend Deployment**: Render (configured in [render.yaml](file:///c:/Users/sharo/Desktop/NexusHR-main/render.yaml))
+- **Frontend Deployment**: Vercel (configured in [vercel.json](file:///c:/Users/sharo/Desktop/NexusHR-main/frontend/vercel.json))
+- **Database**: Neon Serverless PostgreSQL
+- **Rollbacks & Environment Setup**: Detailed point-by-point in the [Deployment Guide](file:///c:/Users/sharo/Desktop/NexusHR-main/docs/Deployment_Guide.md).
+
+---
+
 ## 📄 License
 
 This project is developed for educational and internship demonstration purposes.
