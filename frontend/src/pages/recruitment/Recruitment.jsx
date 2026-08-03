@@ -45,7 +45,7 @@ export default function Recruitment() {
     resumeUrl: "",
     openings: 1,
     postedDate: new Date().toISOString().split("T")[0],
-    closingDate: "",
+    closingDate: null,
     status: "OPEN",
     postedBy: user?.name || "HR Manager",
   });
@@ -87,7 +87,7 @@ export default function Recruitment() {
       resumeUrl: "",
       openings: 1,
       postedDate: new Date().toISOString().split("T")[0],
-      closingDate: "",
+      closingDate: null,
       status: "OPEN",
       postedBy: user?.name || "HR Manager",
     });
@@ -111,7 +111,7 @@ export default function Recruitment() {
       resumeUrl: job.resumeUrl || "",
       openings: job.openings || 1,
       postedDate: job.postedDate || "",
-      closingDate: job.closingDate || "",
+      closingDate: job.closingDate || null,
       status: job.status || "OPEN",
       postedBy: job.postedBy || user?.name || "HR Manager",
     });
@@ -130,11 +130,20 @@ export default function Recruitment() {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    
+    // Sanitize payload to prevent empty strings from causing Jackson deserialization errors on the backend
+    const payload = {
+      ...formData,
+      closingDate: formData.closingDate || null,
+      salaryMin: formData.salaryMin === "" ? null : formData.salaryMin,
+      salaryMax: formData.salaryMax === "" ? null : formData.salaryMax,
+    };
+
     try {
       if (currentJob) {
-        await recruitmentService.update(currentJob.id, formData);
+        await recruitmentService.update(currentJob.id, payload);
       } else {
-        await recruitmentService.create(formData);
+        await recruitmentService.create(payload);
       }
       setIsFormOpen(false);
       fetchData();
